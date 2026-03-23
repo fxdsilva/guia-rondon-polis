@@ -6,15 +6,14 @@ import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
 import { ProfessionalCard } from '@/components/ProfessionalCard'
+import { MultiSelect } from '@/components/MultiSelect'
 import useMainStore from '@/stores/main'
-import { NEIGHBORHOOD_GROUPS } from '@/stores/mockData'
+import { NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
 
 const CategoryPage = () => {
   const { slug } = useParams()
@@ -22,11 +21,11 @@ const CategoryPage = () => {
   const { professionals } = useMainStore()
 
   const initialQuery = searchParams.get('q') || ''
-  const initialBairro = searchParams.get('b') || 'Todos os bairros'
+  const initialBairros = searchParams.get('b') ? searchParams.get('b')!.split(',') : []
   const sortParam = searchParams.get('sort') || 'recomendados'
 
   const [query, setQuery] = useState(initialQuery)
-  const [neighborhood, setNeighborhood] = useState(initialBairro)
+  const [neighborhoods, setNeighborhoods] = useState<string[]>(initialBairros)
 
   const categoryName = useMemo(() => {
     if (!slug || slug === 'todas') return 'Todas as Categorias'
@@ -40,7 +39,14 @@ const CategoryPage = () => {
     let result = professionals
 
     if (slug && slug !== 'todas') {
-      result = result.filter((p) => p.category.toLowerCase() === categoryName.toLowerCase())
+      const matchSlug = slug.toLowerCase()
+      result = result.filter((p) =>
+        p.categories.some(
+          (c) =>
+            c.toLowerCase() === categoryName.toLowerCase() ||
+            c.toLowerCase().replace(/\s+/g, '-') === matchSlug,
+        ),
+      )
     }
 
     if (query) {
@@ -48,15 +54,14 @@ const CategoryPage = () => {
       result = result.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
+          p.categories.some((c) => c.toLowerCase().includes(q)) ||
           p.services.some((s) => s.toLowerCase().includes(q)),
       )
     }
 
-    if (neighborhood !== 'Todos os bairros') {
-      result = result.filter(
-        (p) =>
-          p.neighborhoods.includes(neighborhood) || p.neighborhoods.includes('Todos os bairros'),
+    if (neighborhoods.length > 0 && !neighborhoods.includes('Todos os bairros')) {
+      result = result.filter((p) =>
+        p.neighborhoods.some((n) => neighborhoods.includes(n) || n === 'Todos os bairros'),
       )
     }
 
@@ -71,7 +76,7 @@ const CategoryPage = () => {
     }
 
     return result
-  }, [professionals, slug, categoryName, query, neighborhood, sortParam])
+  }, [professionals, slug, categoryName, query, neighborhoods, sortParam])
 
   const handleFilterUpdate = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams)
@@ -91,9 +96,9 @@ const CategoryPage = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        <aside className="w-full lg:w-64 shrink-0 space-y-6">
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">Filtros</h3>
+        <aside className="w-full lg:w-72 shrink-0 space-y-6">
+          <div className="space-y-5 bg-white p-5 rounded-2xl border shadow-sm">
+            <h3 className="font-semibold text-lg border-b pb-2">Filtros</h3>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Buscar</label>
@@ -104,41 +109,27 @@ const CategoryPage = () => {
                   setQuery(e.target.value)
                   handleFilterUpdate('q', e.target.value)
                 }}
+                className="bg-muted/30"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Bairro</label>
-              <Select
-                value={neighborhood}
-                onValueChange={(val) => {
-                  setNeighborhood(val)
-                  handleFilterUpdate('b', val)
+              <label className="text-sm font-medium text-muted-foreground">Bairros</label>
+              <MultiSelect
+                options={NEIGHBORHOOD_OPTIONS}
+                selected={neighborhoods}
+                onChange={(vals) => {
+                  setNeighborhoods(vals)
+                  handleFilterUpdate('b', vals.join(','))
                 }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um bairro" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Todos os bairros">Todos os bairros</SelectItem>
-                  {Object.entries(NEIGHBORHOOD_GROUPS).map(([group, hoods]) => (
-                    <SelectGroup key={group}>
-                      <SelectLabel>{group}</SelectLabel>
-                      {hoods.map((n) => (
-                        <SelectItem key={n} value={n}>
-                          {n}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="Selecione as regiões..."
+              />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Ordenar por</label>
               <Select value={sortParam} onValueChange={(val) => handleFilterUpdate('sort', val)}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-muted/30">
                   <SelectValue placeholder="Ordenar por" />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,6 +138,20 @@ const CategoryPage = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            {(query || neighborhoods.length > 0) && (
+              <Button
+                variant="outline"
+                className="w-full mt-4"
+                onClick={() => {
+                  setQuery('')
+                  setNeighborhoods([])
+                  setSearchParams(new URLSearchParams())
+                }}
+              >
+                Limpar Filtros
+              </Button>
+            )}
           </div>
         </aside>
 
@@ -160,22 +165,22 @@ const CategoryPage = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-20 bg-muted/30 rounded-2xl border border-dashed flex flex-col items-center justify-center">
+            <div className="text-center py-20 bg-muted/30 rounded-2xl border border-dashed flex flex-col items-center justify-center animate-fade-in">
               <Frown className="w-16 h-16 text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold text-secondary mb-2">
                 Nenhum profissional encontrado
               </h3>
-              <p className="text-muted-foreground mb-6">
-                Tente ajustar os filtros ou busque por outro termo.
+              <p className="text-muted-foreground mb-6 max-w-md">
+                Tente ajustar os filtros, selecionar menos bairros ou buscar por outro termo.
               </p>
               <Button
                 onClick={() => {
                   setQuery('')
-                  setNeighborhood('Todos os bairros')
+                  setNeighborhoods([])
                   setSearchParams(new URLSearchParams())
                 }}
               >
-                Limpar Filtros
+                Limpar Todos os Filtros
               </Button>
             </div>
           )}

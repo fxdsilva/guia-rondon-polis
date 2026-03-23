@@ -50,7 +50,9 @@ const ProfessionalPage = () => {
                   )}
                 </div>
 
-                <p className="text-lg text-muted-foreground font-medium">{pro.category}</p>
+                <p className="text-lg text-muted-foreground font-medium">
+                  {pro.categories.join(' • ')}
+                </p>
 
                 <div className="flex flex-wrap justify-center sm:justify-start items-center gap-4 text-sm">
                   <div className="flex items-center gap-1.5 font-medium">
@@ -76,7 +78,7 @@ const ProfessionalPage = () => {
             <div className="hidden md:block">
               <Button
                 size="lg"
-                className="gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white text-lg px-8 h-14 rounded-xl shadow-lg"
+                className="gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white text-lg px-8 h-14 rounded-xl shadow-lg transition-transform hover:scale-105"
                 onClick={handleWhatsApp}
               >
                 <MessageCircle className="w-6 h-6" />
@@ -135,7 +137,11 @@ const ProfessionalPage = () => {
                 <h3 className="text-xl font-bold mb-4">Área de Atendimento</h3>
                 <div className="flex flex-wrap gap-2">
                   {pro.neighborhoods.map((n, idx) => (
-                    <Badge key={idx} variant="outline" className="text-sm py-1 px-3 bg-muted/50">
+                    <Badge
+                      key={idx}
+                      variant="outline"
+                      className="text-sm py-1 px-3 bg-muted/50 border-border"
+                    >
                       {n}
                     </Badge>
                   ))}
@@ -144,17 +150,26 @@ const ProfessionalPage = () => {
             </TabsContent>
 
             <TabsContent value="fotos" className="animate-fade-in">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {pro.gallery.map((img, idx) => (
-                  <div key={idx} className="aspect-square rounded-xl overflow-hidden border">
-                    <img
-                      src={img}
-                      alt={`Trabalho ${idx + 1}`}
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500 cursor-pointer"
-                    />
-                  </div>
-                ))}
-              </div>
+              {pro.gallery.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {pro.gallery.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className="aspect-square rounded-xl overflow-hidden border shadow-sm group"
+                    >
+                      <img
+                        src={img}
+                        alt={`Trabalho ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  Nenhuma foto disponível no momento.
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="avaliacoes" className="animate-fade-in">
@@ -186,7 +201,7 @@ const ProfessionalPage = () => {
 
       <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-40">
         <Button
-          className="w-full gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white h-12 text-lg rounded-xl"
+          className="w-full gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white h-12 text-lg rounded-xl shadow-lg"
           onClick={handleWhatsApp}
         >
           <MessageCircle className="w-6 h-6" />

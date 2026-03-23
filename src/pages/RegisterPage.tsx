@@ -1,64 +1,157 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, Wand2, UploadCloud, Edit3 } from 'lucide-react'
+import { CheckCircle2, Wand2, UploadCloud, Edit3, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { CATEGORY_GROUPS, NEIGHBORHOOD_GROUPS } from '@/stores/mockData'
+import { Badge } from '@/components/ui/badge'
+import { CATEGORY_OPTIONS, NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
 import useMainStore from '@/stores/main'
+import { MultiSelect } from '@/components/MultiSelect'
+import { ImageCropper } from '@/components/ImageCropper'
+
+const getAISuggestions = (cats: string[]) => {
+  const suggestions: Record<string, string[]> = {
+    Eletricista: [
+      'Instalação de tomadas',
+      'Troca de fiação',
+      'Quadro de luz',
+      'Projetos elétricos',
+      'Manutenção preventiva',
+    ],
+    Encanador: [
+      'Caça-vazamentos',
+      'Desentupimento',
+      'Instalação de pias',
+      "Limpeza de caixa d'água",
+      'Tubulação',
+    ],
+    Diarista: [
+      'Faxina geral',
+      'Limpeza pós-obra',
+      'Passadoria',
+      'Organização de armários',
+      'Limpeza de vidros',
+    ],
+    Mecânico: [
+      'Revisão geral',
+      'Troca de óleo',
+      'Suspensão',
+      'Freios',
+      'Injeção eletrônica',
+      'Alinhamento',
+    ],
+    Pedreiro: ['Alvenaria', 'Reboco', 'Contra-piso', 'Assentamento de porcelanato', 'Laje'],
+    'Ar-condicionado': [
+      'Instalação',
+      'Limpeza de filtros',
+      'Carga de gás',
+      'Manutenção corretiva',
+      'Higienização profunda',
+    ],
+    Informática: [
+      'Formatação',
+      'Montagem de PC',
+      'Remoção de vírus',
+      'Configuração de redes',
+      'Recuperação de dados',
+    ],
+    Pintor: [
+      'Pintura interna',
+      'Pintura externa',
+      'Massa corrida',
+      'Textura',
+      'Grafiato',
+      'Verniz',
+    ],
+  }
+  let result: string[] = []
+  cats.forEach((c) => {
+    if (suggestions[c]) result.push(...suggestions[c])
+  })
+  if (result.length === 0)
+    result = [
+      'Atendimento a domicílio',
+      'Orçamento sem compromisso',
+      'Serviço com garantia',
+      'Pagamento facilitado',
+    ]
+  return Array.from(new Set(result)).slice(0, 8)
+}
 
 const RegisterPage = () => {
   const [step, setStep] = useState(1)
   const navigate = useNavigate()
   const { addProfessional } = useMainStore()
   const [isGenerating, setIsGenerating] = useState(false)
+  const [cropData, setCropData] = useState<{ src: string; type: 'profile' | 'gallery' } | null>(
+    null,
+  )
 
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     image: '',
-    category: '',
+    categories: [] as string[],
     customCategory: '',
-    neighborhoods: '',
+    neighborhoods: [] as string[],
     description: '',
     services: '',
     gallery: [] as string[],
   })
 
+  const suggestedServices = useMemo(
+    () => getAISuggestions(formData.categories),
+    [formData.categories],
+  )
+
   const generateAI = () => {
-    if (!formData.category) return
+    if (formData.categories.length === 0) return
     setIsGenerating(true)
     setTimeout(() => {
-      const catName = formData.category === 'Outro' ? formData.customCategory : formData.category
+      const catsText = formData.categories.includes('Outro')
+        ? formData.customCategory
+        : formData.categories.join(' e ')
       setFormData((prev) => ({
         ...prev,
-        description: `Sou profissional especializado em ${catName} com vasta experiência em Rondonópolis. Prezo pela excelência, pontualidade e satisfação total dos meus clientes. Entre em contato para um orçamento detalhado e sem compromisso!`,
+        description: `Sou profissional especializado em ${catsText} com vasta experiência em Rondonópolis. Prezo pela excelência, pontualidade e satisfação total dos meus clientes. Entre em contato para um orçamento detalhado e sem compromisso!`,
       }))
       setIsGenerating(false)
     }, 1200)
   }
 
-  const handleImageUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    field: 'image' | 'gallery',
-  ) => {
-    if (e.target.files && e.target.files.length > 0) {
-      if (field === 'image') {
-        setFormData({ ...formData, image: URL.createObjectURL(e.target.files[0]) })
-      } else {
-        const newImgs = Array.from(e.target.files).map((f) => URL.createObjectURL(f))
-        setFormData((prev) => ({ ...prev, gallery: [...prev.gallery, ...newImgs].slice(0, 5) }))
-      }
+  const handleAddService = (srv: string) => {
+    const current = formData.services
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+    if (!current.includes(srv)) {
+      setFormData({ ...formData, services: [...current, srv].join(', ') })
     }
+  }
+
+  const handleImageSelect = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: 'profile' | 'gallery',
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const src = URL.createObjectURL(e.target.files[0])
+      setCropData({ src, type })
+      e.target.value = ''
+    }
+  }
+
+  const handleCropComplete = (croppedBase64: string) => {
+    if (cropData?.type === 'profile') {
+      setFormData({ ...formData, image: croppedBase64 })
+    } else if (cropData?.type === 'gallery') {
+      setFormData((prev) => ({ ...prev, gallery: [...prev.gallery, croppedBase64].slice(0, 5) }))
+    }
+    setCropData(null)
+  }
+
+  const handleRemoveGalleryImage = (index: number) => {
+    setFormData((prev) => ({ ...prev, gallery: prev.gallery.filter((_, i) => i !== index) }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -67,19 +160,28 @@ const RegisterPage = () => {
       setStep(step + 1)
       return
     }
-    const finalCat = formData.category === 'Outro' ? formData.customCategory : formData.category
+
+    let finalCategories = [...formData.categories]
+    if (finalCategories.includes('Outro') && formData.customCategory) {
+      finalCategories = finalCategories.filter((c) => c !== 'Outro')
+      finalCategories.push(formData.customCategory)
+    }
+
     addProfessional({
       id: `new-${Date.now()}`,
       name: formData.name,
-      category: finalCat,
+      categories: finalCategories,
       rating: 5.0,
       reviewsCount: 0,
-      neighborhoods: [formData.neighborhoods],
+      neighborhoods: formData.neighborhoods,
       premium: false,
       verified: false,
       phone: formData.phone.replace(/\D/g, ''),
       description: formData.description,
-      services: formData.services.split(',').map((s) => s.trim()),
+      services: formData.services
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
       image: formData.image || 'https://img.usecurling.com/ppl/medium',
       gallery: formData.gallery,
       reviews: [],
@@ -90,8 +192,8 @@ const RegisterPage = () => {
 
   if (step === 5)
     return (
-      <div className="container mx-auto px-4 py-20 max-w-lg text-center animate-fade-in-up">
-        <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
+      <div className="container mx-auto px-4 py-20 max-w-lg text-center animate-fade-in-up flex flex-col items-center">
+        <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
           <CheckCircle2 className="w-12 h-12" />
         </div>
         <h2 className="text-3xl font-bold mb-4">Cadastro Enviado!</h2>
@@ -99,14 +201,19 @@ const RegisterPage = () => {
           Seu perfil foi criado e está em análise. Em breve você estará visível para milhares de
           clientes em Rondonópolis.
         </p>
-        <Button size="lg" onClick={() => navigate('/')} className="w-full">
-          Voltar para o Início
-        </Button>
+        <div className="flex flex-col gap-3 w-full">
+          <Button size="lg" variant="outline" onClick={() => setStep(1)} className="w-full gap-2">
+            <Edit3 className="w-4 h-4" /> Editar Dados
+          </Button>
+          <Button size="lg" onClick={() => navigate('/')} className="w-full">
+            Voltar para o Início
+          </Button>
+        </div>
       </div>
     )
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-2xl">
+    <div className="container mx-auto px-4 py-12 max-w-2xl relative">
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-bold text-secondary mb-2">Cadastre seus Serviços</h1>
         <p className="text-muted-foreground">
@@ -119,7 +226,7 @@ const RegisterPage = () => {
         {[1, 2, 3, 4].map((num) => (
           <div
             key={num}
-            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${step >= num ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${step >= num ? 'bg-primary text-primary-foreground shadow-md' : 'bg-muted text-muted-foreground'}`}
           >
             {num}
           </div>
@@ -153,22 +260,28 @@ const RegisterPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <UploadCloud className="w-4 h-4" /> Foto de Perfil
+              <label className="text-sm font-medium flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <UploadCloud className="w-4 h-4" /> Foto de Perfil
+                </span>
               </label>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e, 'image')}
-                className="cursor-pointer"
-              />
-              {formData.image && (
-                <img
-                  src={formData.image}
-                  alt="Preview"
-                  className="w-16 h-16 rounded-full object-cover mt-2 border"
-                />
-              )}
+              <div className="flex items-center gap-4">
+                <div className="flex-1 relative">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageSelect(e, 'profile')}
+                    className="cursor-pointer"
+                  />
+                </div>
+                {formData.image && (
+                  <img
+                    src={formData.image}
+                    alt="Preview"
+                    className="w-12 h-12 rounded-full object-cover border border-border shadow-sm shrink-0"
+                  />
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -177,37 +290,19 @@ const RegisterPage = () => {
           <div className="space-y-6">
             <h3 className="text-xl font-semibold mb-4 border-b pb-2">Área de Atuação</h3>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Categoria Principal</label>
-              <Select
-                required
-                value={formData.category}
-                onValueChange={(val) =>
-                  setFormData({ ...formData, category: val, customCategory: '' })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(CATEGORY_GROUPS).map(([group, cats]) => (
-                    <SelectGroup key={group}>
-                      <SelectLabel>{group}</SelectLabel>
-                      {cats.map((c) => (
-                        <SelectItem key={c} value={c}>
-                          {c}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                  <SelectItem value="Outro" className="font-semibold text-primary">
-                    Outro (Especificar)
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium">
+                Categorias (Pode selecionar mais de uma)
+              </label>
+              <MultiSelect
+                options={CATEGORY_OPTIONS}
+                selected={formData.categories}
+                onChange={(vals) => setFormData({ ...formData, categories: vals })}
+                placeholder="Selecione as categorias..."
+              />
             </div>
-            {formData.category === 'Outro' && (
+            {formData.categories.includes('Outro') && (
               <div className="space-y-2 animate-fade-in">
-                <label className="text-sm font-medium">Qual a sua categoria?</label>
+                <label className="text-sm font-medium">Especifique a categoria</label>
                 <Input
                   required
                   value={formData.customCategory}
@@ -217,24 +312,13 @@ const RegisterPage = () => {
               </div>
             )}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Região Principal de Atendimento</label>
-              <Select
-                required
-                value={formData.neighborhoods}
-                onValueChange={(val) => setFormData({ ...formData, neighborhoods: val })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma região" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Todos os bairros">Atendo toda a cidade</SelectItem>
-                  {Object.keys(NEIGHBORHOOD_GROUPS).map((group) => (
-                    <SelectItem key={group} value={group}>
-                      {group}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium">Regiões de Atendimento</label>
+              <MultiSelect
+                options={NEIGHBORHOOD_OPTIONS}
+                selected={formData.neighborhoods}
+                onChange={(vals) => setFormData({ ...formData, neighborhoods: vals })}
+                placeholder="Selecione as regiões..."
+              />
             </div>
           </div>
         )}
@@ -250,7 +334,7 @@ const RegisterPage = () => {
                   variant="outline"
                   size="sm"
                   onClick={generateAI}
-                  disabled={!formData.category || isGenerating}
+                  disabled={formData.categories.length === 0 || isGenerating}
                   className="h-7 text-xs gap-1"
                 >
                   <Wand2 className="w-3 h-3" /> {isGenerating ? 'Gerando...' : 'Sugerir com IA'}
@@ -274,27 +358,59 @@ const RegisterPage = () => {
                 onChange={(e) => setFormData({ ...formData, services: e.target.value })}
                 placeholder="Manutenção, Instalação, Limpeza..."
               />
+              {suggestedServices.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  <span className="text-xs text-muted-foreground w-full block mb-1 flex items-center gap-1">
+                    <Wand2 className="w-3 h-3 text-primary" /> Sugestões baseadas nas categorias:
+                  </span>
+                  {suggestedServices.map((srv) => (
+                    <Badge
+                      key={srv}
+                      variant="secondary"
+                      className="cursor-pointer hover:bg-primary/20 transition-colors text-xs py-1 px-2.5 font-normal border shadow-sm"
+                      onClick={() => handleAddService(srv)}
+                    >
+                      + {srv}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <UploadCloud className="w-4 h-4" /> Fotos do Trabalho (Máx 5)
+              <label className="text-sm font-medium flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <UploadCloud className="w-4 h-4" /> Fotos do Trabalho (Máx 5)
+                </span>
+                <span className="text-xs text-muted-foreground">{formData.gallery.length}/5</span>
               </label>
               <Input
                 type="file"
                 accept="image/*"
-                multiple
-                onChange={(e) => handleImageUpload(e, 'gallery')}
+                onChange={(e) => handleImageSelect(e, 'gallery')}
                 className="cursor-pointer"
+                disabled={formData.gallery.length >= 5}
               />
               {formData.gallery.length > 0 && (
-                <div className="flex gap-2 mt-2 flex-wrap">
+                <div className="flex gap-3 mt-4 flex-wrap">
                   {formData.gallery.map((img, i) => (
-                    <img
+                    <div
                       key={i}
-                      src={img}
-                      alt=""
-                      className="w-16 h-16 rounded-md object-cover border"
-                    />
+                      className="relative group animate-fade-in-up"
+                      style={{ animationDelay: `${i * 50}ms` }}
+                    >
+                      <img
+                        src={img}
+                        alt=""
+                        className="w-16 h-16 rounded-md object-cover border shadow-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveGalleryImage(i)}
+                        className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -317,64 +433,108 @@ const RegisterPage = () => {
               </Button>
             </div>
             <div className="space-y-4 text-sm">
-              <div className="flex items-center gap-4">
-                {formData.image && (
+              <div className="flex items-center gap-4 bg-muted/20 p-4 rounded-xl border">
+                {formData.image ? (
                   <img
                     src={formData.image}
                     alt="Perfil"
-                    className="w-16 h-16 rounded-full object-cover border"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
                   />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-white shadow-sm">
+                    <span className="text-muted-foreground text-xs">Sem foto</span>
+                  </div>
                 )}
                 <div>
                   <p className="font-bold text-lg">{formData.name}</p>
                   <p className="text-muted-foreground">{formData.phone}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-xl">
-                <div>
-                  <p className="font-medium text-muted-foreground">Categoria</p>
-                  <p>
-                    {formData.category === 'Outro' ? formData.customCategory : formData.category}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="bg-muted/30 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
+                  <p className="font-medium text-muted-foreground text-xs uppercase mb-1">
+                    Categorias
+                  </p>
+                  <p className="font-medium">
+                    {formData.categories.includes('Outro')
+                      ? [
+                          ...formData.categories.filter((c) => c !== 'Outro'),
+                          formData.customCategory,
+                        ].join(', ')
+                      : formData.categories.join(', ')}
                   </p>
                 </div>
-                <div>
-                  <p className="font-medium text-muted-foreground">Região</p>
-                  <p>{formData.neighborhoods}</p>
+                <div className="bg-muted/30 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
+                  <p className="font-medium text-muted-foreground text-xs uppercase mb-1">
+                    Regiões
+                  </p>
+                  <p className="font-medium">{formData.neighborhoods.join(', ')}</p>
                 </div>
               </div>
               <div>
                 <p className="font-medium text-muted-foreground mb-1">Sobre</p>
-                <p className="bg-muted/30 p-3 rounded-lg">{formData.description}</p>
+                <p className="bg-muted/30 p-3 rounded-lg leading-relaxed">{formData.description}</p>
               </div>
               <div>
-                <p className="font-medium text-muted-foreground mb-1">Serviços</p>
+                <p className="font-medium text-muted-foreground mb-2">Serviços Específicos</p>
                 <div className="flex flex-wrap gap-2">
-                  {formData.services.split(',').map((s, i) => (
-                    <span
-                      key={i}
-                      className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs"
-                    >
-                      {s.trim()}
-                    </span>
-                  ))}
+                  {formData.services.split(',').map(
+                    (s, i) =>
+                      s.trim() && (
+                        <span
+                          key={i}
+                          className="bg-primary/10 text-primary px-2.5 py-1 rounded-md text-xs font-medium border border-primary/20"
+                        >
+                          {s.trim()}
+                        </span>
+                      ),
+                  )}
                 </div>
               </div>
+              {formData.gallery.length > 0 && (
+                <div>
+                  <p className="font-medium text-muted-foreground mb-2">Galeria</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {formData.gallery.map((img, i) => (
+                      <img
+                        key={i}
+                        src={img}
+                        alt=""
+                        className="w-14 h-14 rounded-md object-cover border shadow-sm"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        <div className="flex justify-between mt-10">
+        <div className="flex justify-between mt-10 pt-6 border-t">
           <Button
             type="button"
             variant="outline"
             onClick={() => setStep(step - 1)}
             disabled={step === 1}
+            className="w-32"
           >
             Voltar
           </Button>
-          <Button type="submit">{step === 4 ? 'Confirmar e Enviar' : 'Avançar'}</Button>
+          <Button type="submit" className="w-40 shadow-md">
+            {step === 4 ? 'Confirmar' : 'Avançar'}
+          </Button>
         </div>
       </form>
+
+      {cropData && (
+        <ImageCropper
+          imageSrc={cropData.src}
+          circular={cropData.type === 'profile'}
+          allowToggle={cropData.type === 'gallery'}
+          onCrop={handleCropComplete}
+          onCancel={() => setCropData(null)}
+        />
+      )}
     </div>
   )
 }

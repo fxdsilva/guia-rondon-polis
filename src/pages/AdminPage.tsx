@@ -32,7 +32,7 @@ const AdminPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="container mx-auto px-4 py-20 flex justify-center items-center flex-1">
+      <div className="container mx-auto px-4 py-20 flex justify-center items-center flex-1 animate-fade-in">
         <form
           onSubmit={handleLogin}
           className="max-w-sm w-full bg-white p-8 rounded-2xl shadow-sm border space-y-6"
@@ -43,7 +43,7 @@ const AdminPage = () => {
           </div>
 
           {error && (
-            <p className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded">
+            <p className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded font-medium">
               {error}
             </p>
           )}
@@ -78,7 +78,7 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 animate-fade-in">
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
         <div>
           <h1 className="text-3xl font-bold text-secondary">Painel Administrativo</h1>
@@ -94,7 +94,7 @@ const AdminPage = () => {
           <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead>Profissional</TableHead>
-              <TableHead>Categoria</TableHead>
+              <TableHead>Categorias</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-center">Premium</TableHead>
               <TableHead className="text-center">Verificado</TableHead>
@@ -116,7 +116,9 @@ const AdminPage = () => {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{pro.category}</TableCell>
+                <TableCell className="max-w-[200px] truncate" title={pro.categories.join(', ')}>
+                  {pro.categories.join(', ')}
+                </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                     Ativo

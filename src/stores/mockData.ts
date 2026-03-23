@@ -11,7 +11,7 @@ export type Review = {
 export type Professional = {
   id: string
   name: string
-  category: Category
+  categories: Category[]
   rating: number
   reviewsCount: number
   neighborhoods: string[]
@@ -78,6 +78,13 @@ export const CATEGORY_GROUPS = {
   Pets: ['Banho e tosa', 'Adestrador', 'Veterinário'],
   'Transporte e Frete': ['Frete', 'Mudança', 'Entregador'],
 }
+
+export const CATEGORY_OPTIONS = [
+  ...Object.entries(CATEGORY_GROUPS).flatMap(([group, cats]) =>
+    cats.map((c) => ({ label: c, value: c, group })),
+  ),
+  { label: 'Outro (Especificar)', value: 'Outro', group: 'Outros' },
+]
 
 export const MOCK_CATEGORIES = Object.values(CATEGORY_GROUPS).flat()
 
@@ -156,6 +163,13 @@ export const NEIGHBORHOOD_GROUPS = {
   Industriais: ['Distrito Industrial', 'Parque Industrial Vetorasso'],
 }
 
+export const NEIGHBORHOOD_OPTIONS = [
+  { label: 'Atendo toda a cidade', value: 'Todos os bairros', group: 'Geral' },
+  ...Object.entries(NEIGHBORHOOD_GROUPS).flatMap(([group, hoods]) =>
+    hoods.map((n) => ({ label: n, value: n, group })),
+  ),
+]
+
 export const MOCK_NEIGHBORHOODS = Object.values(NEIGHBORHOOD_GROUPS).flat()
 
 const MOCK_REVIEWS: Review[] = [
@@ -186,7 +200,7 @@ export const MOCK_PROFESSIONALS: Professional[] = [
   {
     id: 'p1',
     name: 'Roberto Carlos',
-    category: 'Eletricista',
+    categories: ['Eletricista', 'Instalação elétrica'],
     rating: 4.8,
     reviewsCount: 42,
     neighborhoods: ['Centro', 'Vila Aurora'],
@@ -213,7 +227,7 @@ export const MOCK_PROFESSIONALS: Professional[] = [
   {
     id: 'p2',
     name: 'Ana Souza',
-    category: 'Diarista',
+    categories: ['Diarista', 'Faxineira'],
     rating: 5.0,
     reviewsCount: 128,
     neighborhoods: ['Centro', 'Parque Sagrada Família'],
@@ -234,7 +248,7 @@ export const MOCK_PROFESSIONALS: Professional[] = [
   {
     id: 'p3',
     name: 'Marcos Paulo',
-    category: 'Encanador',
+    categories: ['Encanador'],
     rating: 4.5,
     reviewsCount: 15,
     neighborhoods: ['Parque Sagrada Família', 'Jardim Atlântico'],
@@ -255,7 +269,7 @@ export const MOCK_PROFESSIONALS: Professional[] = [
   {
     id: 'p4',
     name: 'Claudio Pinturas',
-    category: 'Pintor',
+    categories: ['Pintor', 'Reformas em geral'],
     rating: 4.9,
     reviewsCount: 56,
     neighborhoods: ['Parque Universitário', 'Centro'],
@@ -276,7 +290,7 @@ export const MOCK_PROFESSIONALS: Professional[] = [
   {
     id: 'p5',
     name: 'Tech Fix Soluções',
-    category: 'Informática',
+    categories: ['Informática', 'Conserto de celular'],
     rating: 4.7,
     reviewsCount: 89,
     neighborhoods: ['Vila Operária', 'Centro'],

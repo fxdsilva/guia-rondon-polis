@@ -51,7 +51,12 @@ export function ProfessionalCard({ pro }: Props) {
                 )}
               </div>
 
-              <p className="text-sm text-muted-foreground mb-2">{pro.category}</p>
+              <p
+                className="text-sm text-muted-foreground mb-2 truncate"
+                title={pro.categories.join(', ')}
+              >
+                {pro.categories.join(', ')}
+              </p>
 
               <div className="flex items-center gap-1.5 text-sm font-medium">
                 <Star className="w-4 h-4 fill-accent text-accent" />

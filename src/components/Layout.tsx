@@ -1,27 +1,58 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Menu, MessageCircle, MapPin } from 'lucide-react'
+import { Menu, MessageCircle, MapPin, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { CATEGORY_GROUPS } from '@/stores/mockData'
+
+const getSlug = (str: string) => str.toLowerCase().replace(/\s+/g, '-')
 
 export default function Layout() {
   const location = useLocation()
-  const isHome = location.pathname === '/'
 
   const NavLinks = () => (
     <>
-      <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
+      <Link to="/" className="text-sm font-medium hover:text-primary transition-colors py-2">
         Início
       </Link>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1 outline-none py-2 text-left">
+          Categorias <ChevronDown className="w-4 h-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[260px] max-h-[60vh] overflow-y-auto">
+          <DropdownMenuItem asChild className="font-semibold mb-2 bg-muted/30">
+            <Link to="/categoria/todas">Todas as Categorias</Link>
+          </DropdownMenuItem>
+          {Object.entries(CATEGORY_GROUPS).map(([group, cats]) => (
+            <DropdownMenuGroup key={group} className="mb-2">
+              <DropdownMenuLabel className="text-xs text-muted-foreground bg-muted py-1">
+                {group}
+              </DropdownMenuLabel>
+              {cats.map((cat) => (
+                <DropdownMenuItem key={cat} asChild>
+                  <Link to={`/categoria/${getSlug(cat)}`}>{cat}</Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <Link
-        to="/categoria/todas"
-        className="text-sm font-medium hover:text-primary transition-colors"
+        to="/cadastrar"
+        className="text-sm font-medium hover:text-primary transition-colors py-2"
       >
-        Categorias
-      </Link>
-      <Link to="/cadastrar" className="text-sm font-medium hover:text-primary transition-colors">
         Cadastrar Serviço
       </Link>
-      <Link to="/admin" className="text-sm font-medium hover:text-primary transition-colors">
+      <Link to="/admin" className="text-sm font-medium hover:text-primary transition-colors py-2">
         Admin
       </Link>
     </>
@@ -29,16 +60,16 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <MapPin className="w-6 h-6 text-primary" />
+          <Link to="/" className="flex items-center gap-2 group">
+            <MapPin className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
             <span className="font-bold text-xl text-secondary">Guia Rondonópolis</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
             <NavLinks />
-            <Button asChild>
+            <Button asChild className="shadow-sm hover:shadow-md transition-all">
               <Link to="/cadastrar">Anuncie Grátis</Link>
             </Button>
           </nav>
@@ -52,16 +83,18 @@ export default function Layout() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px]">
               <SheetHeader>
-                <SheetTitle className="text-left flex items-center gap-2">
+                <SheetTitle className="text-left flex items-center gap-2 border-b pb-4">
                   <MapPin className="w-5 h-5 text-primary" />
                   Guia Rondonópolis
                 </SheetTitle>
               </SheetHeader>
-              <nav className="flex flex-col gap-4 mt-8">
+              <nav className="flex flex-col gap-2 mt-6 items-start">
                 <NavLinks />
-                <Button asChild className="mt-4 w-full">
-                  <Link to="/cadastrar">Anuncie Grátis</Link>
-                </Button>
+                <div className="w-full mt-6 pt-6 border-t">
+                  <Button asChild className="w-full">
+                    <Link to="/cadastrar">Anuncie Grátis</Link>
+                  </Button>
+                </div>
               </nav>
             </SheetContent>
           </Sheet>
@@ -90,7 +123,7 @@ export default function Layout() {
               <li>
                 <Link
                   to="/categoria/todas"
-                  className="text-sm text-secondary-foreground/80 hover:text-white"
+                  className="text-sm text-secondary-foreground/80 hover:text-white transition-colors"
                 >
                   Todas as Categorias
                 </Link>
@@ -98,13 +131,16 @@ export default function Layout() {
               <li>
                 <Link
                   to="/cadastrar"
-                  className="text-sm text-secondary-foreground/80 hover:text-white"
+                  className="text-sm text-secondary-foreground/80 hover:text-white transition-colors"
                 >
                   Seja um Profissional
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-secondary-foreground/80 hover:text-white">
+                <a
+                  href="#"
+                  className="text-sm text-secondary-foreground/80 hover:text-white transition-colors"
+                >
                   Termos de Uso
                 </a>
               </li>

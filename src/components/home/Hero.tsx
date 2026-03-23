@@ -3,27 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { NEIGHBORHOOD_GROUPS } from '@/stores/mockData'
+import { MultiSelect } from '@/components/MultiSelect'
+import { NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
 
 export function Hero() {
   const [query, setQuery] = useState('')
-  const [neighborhood, setNeighborhood] = useState('Todos os bairros')
+  const [neighborhoods, setNeighborhoods] = useState<string[]>([])
   const navigate = useNavigate()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     const params = new URLSearchParams()
     if (query) params.set('q', query)
-    if (neighborhood !== 'Todos os bairros') params.set('b', neighborhood)
+    if (neighborhoods.length > 0) params.set('b', neighborhoods.join(','))
     navigate(`/categoria/todas?${params.toString()}`)
   }
 
@@ -32,7 +24,7 @@ export function Hero() {
       <img
         src="https://img.usecurling.com/p/1600/600?q=city%20buildings&color=blue"
         alt="Rondonópolis"
-        className="absolute inset-0 w-full h-full object-cover opacity-20"
+        className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay"
       />
       <div className="relative z-10 container mx-auto px-4 py-24 md:py-32 flex flex-col items-center text-center">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight max-w-4xl animate-fade-in-up">
@@ -48,7 +40,7 @@ export function Hero() {
 
         <form
           onSubmit={handleSearch}
-          className="w-full max-w-3xl flex flex-col md:flex-row gap-3 bg-white p-3 rounded-2xl shadow-xl animate-fade-in-up"
+          className="w-full max-w-4xl flex flex-col md:flex-row gap-3 bg-white p-3 rounded-2xl shadow-xl animate-fade-in-up"
           style={{ animationDelay: '200ms' }}
         >
           <div className="flex-1 relative">
@@ -61,27 +53,19 @@ export function Hero() {
             />
           </div>
           <div className="w-px h-8 bg-border hidden md:block self-center mx-2" />
-          <div className="w-full md:w-64">
-            <Select value={neighborhood} onValueChange={setNeighborhood}>
-              <SelectTrigger className="h-12 text-base border-0 focus:ring-0 shadow-none bg-transparent">
-                <SelectValue placeholder="Bairro" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Todos os bairros">Todos os bairros</SelectItem>
-                {Object.entries(NEIGHBORHOOD_GROUPS).map(([group, hoods]) => (
-                  <SelectGroup key={group}>
-                    <SelectLabel>{group}</SelectLabel>
-                    {hoods.map((n) => (
-                      <SelectItem key={n} value={n}>
-                        {n}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="w-full md:w-72">
+            <MultiSelect
+              options={NEIGHBORHOOD_OPTIONS}
+              selected={neighborhoods}
+              onChange={setNeighborhoods}
+              placeholder="Todas as regiões"
+            />
           </div>
-          <Button type="submit" size="lg" className="h-12 px-8 rounded-xl text-base font-semibold">
+          <Button
+            type="submit"
+            size="lg"
+            className="h-12 px-8 rounded-xl text-base font-semibold shrink-0"
+          >
             Buscar
           </Button>
         </form>
