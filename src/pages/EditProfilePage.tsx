@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
 import useMainStore from '@/stores/main'
 import { useToast } from '@/hooks/use-toast'
 
@@ -29,6 +30,10 @@ const EditProfilePage = () => {
   const { toast } = useToast()
 
   const [loginPhone, setLoginPhone] = useState('')
+  const [step, setStep] = useState<'phone' | 'otp'>('phone')
+  const [otp, setOtp] = useState('')
+  const [pendingProId, setPendingProId] = useState<string | null>(null)
+
   const [formData, setFormData] = useState<any>(null)
 
   useEffect(() => {
@@ -53,8 +58,12 @@ const EditProfilePage = () => {
     const cleanPhone = loginPhone.replace(/\D/g, '')
     const pro = populatedProfessionals.find((p) => p.phone === cleanPhone)
     if (pro) {
-      setCurrentUserId(pro.id)
-      toast({ title: 'Bem-vindo de volta!' })
+      setPendingProId(pro.id)
+      setStep('otp')
+      toast({
+        title: 'Código enviado!',
+        description: 'Verifique seu WhatsApp para continuar. (Para teste, digite 123456)',
+      })
     } else {
       toast({
         title: 'Perfil não encontrado',
@@ -62,6 +71,28 @@ const EditProfilePage = () => {
         variant: 'destructive',
       })
     }
+  }
+
+  const handleOtpSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (otp === '123456') {
+      setCurrentUserId(pendingProId)
+      toast({ title: 'Bem-vindo de volta!' })
+    } else {
+      toast({
+        title: 'Código inválido',
+        description: 'Tente novamente.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleResendOtp = () => {
+    toast({
+      title: 'Código reenviado!',
+      description: 'Um novo código foi enviado para o seu WhatsApp.',
+    })
+    setOtp('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,36 +128,73 @@ const EditProfilePage = () => {
   if (!currentUserId) {
     return (
       <div className="container mx-auto px-4 py-20 flex justify-center items-center flex-1 animate-fade-in">
-        <form
-          onSubmit={handleLogin}
-          className="max-w-sm w-full bg-white p-8 rounded-3xl shadow-xl border space-y-6"
-        >
+        <div className="max-w-sm w-full bg-white p-8 rounded-[2rem] shadow-xl border space-y-6">
           <div className="text-center">
-            <div className="w-14 h-14 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+            <div className="w-14 h-14 bg-[#22c55e]/10 text-[#22c55e] rounded-full flex items-center justify-center mx-auto mb-4">
               <LogIn className="w-7 h-7" />
             </div>
             <h1 className="text-2xl font-bold text-secondary mb-2">Atualizar Dados</h1>
-            <p className="text-sm text-muted-foreground">
-              Digite seu número de WhatsApp cadastrado para acessar seu perfil profissional.
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {step === 'phone'
+                ? 'Digite seu número de WhatsApp cadastrado para acessar seu perfil profissional.'
+                : 'Digite o código enviado para seu WhatsApp'}
             </p>
           </div>
-          <div className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <Label>Seu WhatsApp</Label>
-              <Input
-                type="tel"
-                value={loginPhone}
-                onChange={(e) => setLoginPhone(e.target.value)}
-                required
-                placeholder="(66) 99999-9999"
-                className="h-12 text-lg"
-              />
-            </div>
-          </div>
-          <Button type="submit" className="w-full h-12 text-lg mt-2">
-            Acessar Perfil
-          </Button>
-        </form>
+
+          {step === 'phone' ? (
+            <form onSubmit={handleLogin} className="space-y-6 pt-2">
+              <div className="space-y-2 text-left">
+                <Label className="text-[15px] font-semibold text-secondary">Seu WhatsApp</Label>
+                <Input
+                  type="tel"
+                  value={loginPhone}
+                  onChange={(e) => setLoginPhone(e.target.value)}
+                  required
+                  placeholder="66996229975"
+                  className="h-14 text-lg bg-slate-50 border-slate-200"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full h-14 text-lg font-semibold bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-xl shadow-md transition-all hover:-translate-y-0.5"
+              >
+                Acessar Perfil
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleOtpSubmit} className="space-y-6 pt-2">
+              <div className="flex justify-center mb-2">
+                <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                  <InputOTPGroup className="gap-2">
+                    {[0, 1, 2, 3, 4, 5].map((index) => (
+                      <InputOTPSlot
+                        key={index}
+                        index={index}
+                        className="w-12 h-14 text-xl bg-slate-50 border-slate-200 rounded-lg"
+                      />
+                    ))}
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+              <Button
+                type="submit"
+                disabled={otp.length < 6}
+                className="w-full h-14 text-lg font-semibold bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-xl shadow-md transition-all disabled:opacity-50 disabled:hover:translate-y-0"
+              >
+                Confirmar Código
+              </Button>
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Reenviar código
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     )
   }
