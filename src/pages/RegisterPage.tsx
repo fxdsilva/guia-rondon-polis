@@ -4,12 +4,17 @@ import { Wand2, UploadCloud, Edit3, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { CATEGORY_OPTIONS, NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 import useMainStore from '@/stores/main'
-import { MultiSelect } from '@/components/MultiSelect'
 import { ImageCropper } from '@/components/ImageCropper'
 import { getAISuggestions } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
@@ -17,7 +22,7 @@ import { useToast } from '@/hooks/use-toast'
 const RegisterPage = () => {
   const [step, setStep] = useState(1)
   const navigate = useNavigate()
-  const { addProfessional, setCurrentUserId } = useMainStore()
+  const { categories, neighborhoods, addProfessional, setCurrentUserId } = useMainStore()
   const { toast } = useToast()
   const [isGenerating, setIsGenerating] = useState(false)
   const [cropData, setCropData] = useState<{ src: string; type: 'profile' | 'gallery' } | null>(
@@ -28,9 +33,8 @@ const RegisterPage = () => {
     name: '',
     phone: '',
     image: '',
-    categories: [] as string[],
-    customCategory: '',
-    neighborhoods: [] as string[],
+    categoryId: '',
+    neighborhoodId: '',
     description: '',
     services: '',
     gallery: [] as string[],
@@ -38,29 +42,25 @@ const RegisterPage = () => {
     address: '',
   })
 
-  const suggestedServices = useMemo(
-    () => getAISuggestions(formData.categories),
-    [formData.categories],
-  )
+  const suggestedServices = useMemo(() => {
+    const cat = categories.find((c) => c.id === formData.categoryId)
+    return cat ? getAISuggestions([cat.name]) : []
+  }, [formData.categoryId, categories])
 
   const generateAI = () => {
-    if (formData.categories.length === 0) return
+    if (!formData.categoryId) return
     setIsGenerating(true)
     setTimeout(() => {
-      const catsText = formData.categories.includes('Outro')
-        ? formData.customCategory || 'serviços diversos'
-        : formData.categories.join(' e ')
-
+      const catName =
+        categories.find((c) => c.id === formData.categoryId)?.name || 'serviços diversos'
+      const nbName =
+        neighborhoods.find((n) => n.id === formData.neighborhoodId)?.name || 'Rondonópolis'
       const regionsText =
-        formData.neighborhoods.length > 0
-          ? formData.neighborhoods.includes('Todos os bairros')
-            ? 'em toda Rondonópolis'
-            : `nas regiões de ${formData.neighborhoods.join(', ')}`
-          : 'em Rondonópolis'
+        nbName === 'Todos os bairros' ? 'em toda Rondonópolis' : `na região de ${nbName}`
 
       setFormData((prev) => ({
         ...prev,
-        description: `Sou profissional especializado em ${catsText} com vasta experiência ${regionsText}. Prezo pela excelência, pontualidade e satisfação total dos meus clientes. Entre em contato para um orçamento detalhado e sem compromisso!`,
+        description: `Sou profissional especializado em ${catName} com vasta experiência ${regionsText}. Prezo pela excelência, pontualidade e satisfação total dos meus clientes. Entre em contato para um orçamento detalhado e sem compromisso!`,
       }))
       setIsGenerating(false)
     }, 1200)
@@ -100,50 +100,43 @@ const RegisterPage = () => {
     setFormData((prev) => ({ ...prev, gallery: prev.gallery.filter((_, i) => i !== index) }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (step < 4) {
       setStep(step + 1)
       return
     }
 
-    let finalCategories = [...formData.categories]
-    if (finalCategories.includes('Outro') && formData.customCategory) {
-      finalCategories = finalCategories.filter((c) => c !== 'Outro')
-      finalCategories.push(formData.customCategory)
+    const servicesList = formData.services
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+
+    const newId = await addProfessional(
+      {
+        name: formData.name,
+        phone: formData.phone.replace(/\D/g, ''),
+        description: formData.description,
+        address: formData.hasAddress ? formData.address : '',
+        category_id: formData.categoryId,
+        neighborhood_id: formData.neighborhoodId,
+        plan_id: 'plan-free',
+        verified: false,
+        image: formData.image || 'https://img.usecurling.com/ppl/medium',
+        gallery: formData.gallery,
+        working_hours: 'A combinar',
+      },
+      servicesList,
+    )
+
+    if (newId) {
+      setCurrentUserId(newId)
+      toast({
+        title: 'Cadastro Concluído!',
+        description: 'Seu perfil profissional foi criado com sucesso.',
+      })
+      navigate(`/profissional/${newId}`)
     }
-
-    const newId = `new-${Date.now()}`
-
-    addProfessional({
-      id: newId,
-      name: formData.name,
-      categories: finalCategories,
-      rating: 5.0,
-      reviewsCount: 0,
-      neighborhoods: formData.neighborhoods,
-      premium: false,
-      verified: false,
-      phone: formData.phone.replace(/\D/g, ''),
-      description: formData.description,
-      services: formData.services
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      image: formData.image || 'https://img.usecurling.com/ppl/medium',
-      gallery: formData.gallery,
-      reviews: [],
-      workingHours: 'A combinar',
-      hasAddress: formData.hasAddress,
-      address: formData.hasAddress ? formData.address : '',
-    })
-
-    setCurrentUserId(newId)
-    toast({
-      title: 'Cadastro Concluído!',
-      description: 'Seu perfil profissional foi criado com sucesso.',
-    })
-    navigate(`/profissional/${newId}`)
   }
 
   const getMapQuery = (address: string) => {
@@ -271,33 +264,40 @@ const RegisterPage = () => {
           <div className="space-y-6">
             <h3 className="text-xl font-semibold mb-4 border-b pb-2">Área de Atuação</h3>
             <div className="space-y-2">
-              <Label>Categorias (Pode selecionar mais de uma)</Label>
-              <MultiSelect
-                options={CATEGORY_OPTIONS}
-                selected={formData.categories}
-                onChange={(vals) => setFormData({ ...formData, categories: vals })}
-                placeholder="Selecione as categorias..."
-              />
+              <Label>Categoria Principal</Label>
+              <Select
+                value={formData.categoryId}
+                onValueChange={(val) => setFormData({ ...formData, categoryId: val })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione sua especialidade..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            {formData.categories.includes('Outro') && (
-              <div className="space-y-2 animate-fade-in">
-                <Label>Especifique a categoria</Label>
-                <Input
-                  required
-                  value={formData.customCategory}
-                  onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
-                  placeholder="Ex: Engenheiro Acústico"
-                />
-              </div>
-            )}
             <div className="space-y-2">
-              <Label>Regiões de Atendimento</Label>
-              <MultiSelect
-                options={NEIGHBORHOOD_OPTIONS}
-                selected={formData.neighborhoods}
-                onChange={(vals) => setFormData({ ...formData, neighborhoods: vals })}
-                placeholder="Selecione as regiões..."
-              />
+              <Label>Região de Atendimento Principal</Label>
+              <Select
+                value={formData.neighborhoodId}
+                onValueChange={(val) => setFormData({ ...formData, neighborhoodId: val })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a região..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {neighborhoods.map((n) => (
+                    <SelectItem key={n.id} value={n.id}>
+                      {n.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}
@@ -313,7 +313,7 @@ const RegisterPage = () => {
                   variant="outline"
                   size="sm"
                   onClick={generateAI}
-                  disabled={formData.categories.length === 0 || isGenerating}
+                  disabled={!formData.categoryId || isGenerating}
                   className="h-7 text-xs gap-1"
                 >
                   <Wand2 className="w-3 h-3" /> {isGenerating ? 'Gerando...' : 'Sugerir com IA'}
@@ -328,17 +328,17 @@ const RegisterPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Serviços Específicos (separados por vírgula)</Label>
+              <Label>Serviços Oferecidos (separados por vírgula)</Label>
               <Input
                 required
                 value={formData.services}
                 onChange={(e) => setFormData({ ...formData, services: e.target.value })}
-                placeholder="Manutenção, Instalação, Limpeza..."
+                placeholder="Ex: Manutenção, Instalação, Limpeza..."
               />
               {suggestedServices.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-2">
                   <span className="text-xs text-muted-foreground w-full block mb-1 flex items-center gap-1">
-                    <Wand2 className="w-3 h-3 text-primary" /> Sugestões baseadas nas categorias:
+                    <Wand2 className="w-3 h-3 text-primary" /> Sugestões baseadas na categoria:
                   </span>
                   {suggestedServices.map((srv) => (
                     <Badge
@@ -440,22 +440,17 @@ const RegisterPage = () => {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="bg-muted/30 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
                   <p className="font-medium text-muted-foreground text-xs uppercase mb-1">
-                    Categorias
+                    Categoria Principal
                   </p>
                   <p className="font-medium">
-                    {formData.categories.includes('Outro')
-                      ? [
-                          ...formData.categories.filter((c) => c !== 'Outro'),
-                          formData.customCategory,
-                        ].join(', ')
-                      : formData.categories.join(', ')}
+                    {categories.find((c) => c.id === formData.categoryId)?.name || '-'}
                   </p>
                 </div>
                 <div className="bg-muted/30 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
-                  <p className="font-medium text-muted-foreground text-xs uppercase mb-1">
-                    Regiões
+                  <p className="font-medium text-muted-foreground text-xs uppercase mb-1">Região</p>
+                  <p className="font-medium">
+                    {neighborhoods.find((n) => n.id === formData.neighborhoodId)?.name || '-'}
                   </p>
-                  <p className="font-medium">{formData.neighborhoods.join(', ')}</p>
                 </div>
               </div>
               <div>
@@ -463,7 +458,7 @@ const RegisterPage = () => {
                 <p className="bg-muted/30 p-3 rounded-lg leading-relaxed">{formData.description}</p>
               </div>
               <div>
-                <p className="font-medium text-muted-foreground mb-2">Serviços Oferecidos</p>
+                <p className="font-medium text-muted-foreground mb-2">Serviços Específicos</p>
                 <div className="flex flex-wrap gap-2">
                   {formData.services.split(',').map(
                     (s, i) =>
@@ -507,7 +502,11 @@ const RegisterPage = () => {
           >
             Voltar
           </Button>
-          <Button type="submit" className="w-40 shadow-md">
+          <Button
+            type="submit"
+            className="w-40 shadow-md"
+            disabled={step === 2 && (!formData.categoryId || !formData.neighborhoodId)}
+          >
             {step === 4 ? 'Confirmar' : 'Avançar'}
           </Button>
         </div>

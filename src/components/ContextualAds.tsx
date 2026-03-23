@@ -4,25 +4,24 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import useMainStore from '@/stores/main'
-import { CATEGORY_GROUPS } from '@/stores/mockData'
 
 interface Props {
-  categories: string[]
+  categoryId: string
   layout?: 'vertical' | 'grid'
 }
 
-export function ContextualAds({ categories, layout = 'vertical' }: Props) {
-  const { ads } = useMainStore()
+export function ContextualAds({ categoryId, layout = 'vertical' }: Props) {
+  const { ads, categories } = useMainStore()
 
   const expandedCategories = useMemo(() => {
-    const expanded = new Set(categories.map((c) => c.toLowerCase()))
-    Object.entries(CATEGORY_GROUPS).forEach(([group, cats]) => {
-      if (cats.some((c) => categories.some((cat) => c.toLowerCase() === cat.toLowerCase()))) {
-        expanded.add(group.toLowerCase())
-      }
-    })
-    return Array.from(expanded)
-  }, [categories])
+    const cat = categories.find((c) => c.id === categoryId)
+    if (!cat) return []
+    return [
+      cat.name.toLowerCase(),
+      cat.slug.toLowerCase(),
+      ...(cat.group ? [cat.group.toLowerCase()] : []),
+    ]
+  }, [categoryId, categories])
 
   const displayAds = useMemo(() => {
     return ads.filter(

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CATEGORY_GROUPS, NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
+import useMainStore from '@/stores/main'
 
 export function Hero({
   selectedNeighborhoods,
@@ -22,24 +22,43 @@ export function Hero({
   selectedNeighborhoods?: string[]
   onNeighborhoodChange?: (val: string[]) => void
 }) {
+  const { categories, neighborhoods } = useMainStore()
   const [query, setQuery] = useState('')
   const [segment, setSegment] = useState('todos')
-  const [category, setCategory] = useState('todas')
+  const [categorySlug, setCategorySlug] = useState('todas')
   const [internalNeighborhoods, setInternalNeighborhoods] = useState<string[]>([])
   const navigate = useNavigate()
 
-  const neighborhoods = selectedNeighborhoods ?? internalNeighborhoods
-  const setNeighborhoods = onNeighborhoodChange ?? setInternalNeighborhoods
+  const activeNeighborhoods = selectedNeighborhoods ?? internalNeighborhoods
+  const setActiveNeighborhoods = onNeighborhoodChange ?? setInternalNeighborhoods
+
+  const categoryGroups = useMemo(() => {
+    const groups: Record<string, typeof categories> = {}
+    categories.forEach((c) => {
+      const g = c.group || 'Outros'
+      if (!groups[g]) groups[g] = []
+      groups[g].push(c)
+    })
+    return groups
+  }, [categories])
+
+  const neighborhoodOptions = useMemo(() => {
+    return neighborhoods.map((n) => ({
+      label: n.name,
+      value: n.id,
+      group: n.group || 'Outros',
+    }))
+  }, [neighborhoods])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     const params = new URLSearchParams()
     if (query) params.set('q', query)
-    if (neighborhoods.length > 0) params.set('b', neighborhoods.join(','))
+    if (activeNeighborhoods.length > 0) params.set('b', activeNeighborhoods.join(','))
 
     let targetSlug = 'todas'
-    if (category !== 'todas') {
-      targetSlug = category.toLowerCase().replace(/\s+/g, '-')
+    if (categorySlug !== 'todas') {
+      targetSlug = categorySlug
     } else if (segment !== 'todos') {
       targetSlug = segment.toLowerCase().replace(/\s+/g, '-')
     }
@@ -49,7 +68,7 @@ export function Hero({
 
   const handleSegmentChange = (val: string) => {
     setSegment(val)
-    setCategory('todas')
+    setCategorySlug('todas')
   }
 
   return (
@@ -85,7 +104,7 @@ export function Hero({
                 <SelectItem value="todos" className="font-semibold">
                   Todos os segmentos
                 </SelectItem>
-                {Object.keys(CATEGORY_GROUPS).map((group) => (
+                {Object.keys(categoryGroups).map((group) => (
                   <SelectItem key={group} value={group}>
                     {group}
                   </SelectItem>
@@ -97,7 +116,7 @@ export function Hero({
           <div className="w-px h-8 bg-border hidden md:block self-center mx-1" />
 
           <div className="w-full md:w-56 shrink-0">
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={categorySlug} onValueChange={setCategorySlug}>
               <SelectTrigger className="h-12 border-0 bg-transparent shadow-none focus:ring-0 text-base font-medium">
                 <SelectValue placeholder="Categoria" />
               </SelectTrigger>
@@ -106,21 +125,21 @@ export function Hero({
                   Todas as categorias
                 </SelectItem>
                 {segment === 'todos'
-                  ? Object.entries(CATEGORY_GROUPS).map(([group, cats]) => (
+                  ? Object.entries(categoryGroups).map(([group, cats]) => (
                       <SelectGroup key={group}>
                         <SelectLabel className="text-muted-foreground bg-muted/50 mt-1">
                           {group}
                         </SelectLabel>
                         {cats.map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
+                          <SelectItem key={c.id} value={c.slug}>
+                            {c.name}
                           </SelectItem>
                         ))}
                       </SelectGroup>
                     ))
-                  : CATEGORY_GROUPS[segment as keyof typeof CATEGORY_GROUPS]?.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
+                  : categoryGroups[segment]?.map((c) => (
+                      <SelectItem key={c.id} value={c.slug}>
+                        {c.name}
                       </SelectItem>
                     ))}
               </SelectContent>
@@ -143,9 +162,9 @@ export function Hero({
 
           <div className="w-full md:w-[240px] shrink-0">
             <MultiSelect
-              options={NEIGHBORHOOD_OPTIONS}
-              selected={neighborhoods}
-              onChange={setNeighborhoods}
+              options={neighborhoodOptions}
+              selected={activeNeighborhoods}
+              onChange={setActiveNeighborhoods}
               placeholder="Todas as regiões"
             />
           </div>

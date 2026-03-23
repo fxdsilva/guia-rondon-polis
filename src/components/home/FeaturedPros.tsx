@@ -2,8 +2,8 @@ import { ProfessionalCard } from '@/components/ProfessionalCard'
 import useMainStore from '@/stores/main'
 
 export function FeaturedPros() {
-  const { professionals } = useMainStore()
-  const featured = professionals.filter((p) => p.premium).slice(0, 4)
+  const { populatedProfessionals } = useMainStore()
+  const featured = populatedProfessionals.filter((p) => p.plan?.id === 'plan-premium').slice(0, 4)
 
   if (featured.length === 0) return null
 

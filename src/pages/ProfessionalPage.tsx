@@ -10,10 +10,15 @@ import NotFound from './NotFound'
 
 const ProfessionalPage = () => {
   const { id } = useParams()
-  const { professionals, currentUserId } = useMainStore()
-  const pro = useMemo(() => professionals.find((p) => p.id === id), [id, professionals])
+  const { populatedProfessionals, currentUserId } = useMainStore()
+  const pro = useMemo(
+    () => populatedProfessionals.find((p) => p.id === id),
+    [id, populatedProfessionals],
+  )
 
   if (!pro) return <NotFound />
+
+  const isPremium = pro.plan?.id === 'plan-premium'
 
   const handleWhatsApp = () => {
     const msg = encodeURIComponent(
@@ -55,7 +60,7 @@ const ProfessionalPage = () => {
               <div className="space-y-3 mt-2">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <h1 className="text-3xl font-bold text-secondary">{pro.name}</h1>
-                  {pro.premium && (
+                  {isPremium && (
                     <Badge className="w-fit self-center sm:self-auto bg-accent text-accent-foreground hover:bg-accent/90">
                       Premium
                     </Badge>
@@ -63,7 +68,7 @@ const ProfessionalPage = () => {
                 </div>
 
                 <p className="text-lg text-muted-foreground font-medium">
-                  {pro.categories.join(' • ')}
+                  {pro.category?.name || 'Profissional'}
                 </p>
 
                 <div className="flex flex-wrap justify-center sm:justify-start items-center gap-4 text-sm">
@@ -74,14 +79,11 @@ const ProfessionalPage = () => {
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <MapPin className="w-4 h-4" />
-                    <span>
-                      {pro.neighborhoods[0]}{' '}
-                      {pro.neighborhoods.length > 1 && `+${pro.neighborhoods.length - 1}`}
-                    </span>
+                    <span>{pro.neighborhood?.name || 'Rondonópolis'}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Clock className="w-4 h-4" />
-                    <span>{pro.workingHours}</span>
+                    <span>{pro.working_hours}</span>
                   </div>
                 </div>
               </div>
@@ -93,8 +95,7 @@ const ProfessionalPage = () => {
                 className="gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white text-lg px-8 h-14 rounded-xl shadow-lg transition-transform hover:scale-105"
                 onClick={handleWhatsApp}
               >
-                <MessageCircle className="w-6 h-6" />
-                Solicitar Orçamento
+                <MessageCircle className="w-6 h-6" /> Solicitar Orçamento
               </Button>
             </div>
           </div>
@@ -133,31 +134,32 @@ const ProfessionalPage = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-2xl shadow-sm border">
-                <h3 className="text-xl font-bold mb-4">Serviços Oferecidos</h3>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {pro.services.map((service, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                      <span className="text-secondary-foreground/80">{service}</span>
-                    </div>
-                  ))}
+              {pro.services.length > 0 && (
+                <div className="bg-white p-6 rounded-2xl shadow-sm border">
+                  <h3 className="text-xl font-bold mb-4">Serviços Oferecidos</h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {pro.services.map((service) => (
+                      <div key={service.id} className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                        <span className="text-secondary-foreground/80">{service.name}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="bg-white p-6 rounded-2xl shadow-sm border">
-                <h3 className="text-xl font-bold mb-4">Área de Atendimento</h3>
+                <h3 className="text-xl font-bold mb-4">Localização</h3>
                 <div className="flex flex-wrap gap-2">
-                  {pro.neighborhoods.map((n, idx) => (
-                    <Badge
-                      key={idx}
-                      variant="outline"
-                      className="text-sm py-1 px-3 bg-muted/50 border-border"
-                    >
-                      {n}
-                    </Badge>
-                  ))}
+                  <Badge variant="outline" className="text-sm py-1 px-3 bg-muted/50 border-border">
+                    {pro.neighborhood?.name || 'Todas as regiões'}
+                  </Badge>
                 </div>
+                {pro.address && (
+                  <p className="mt-4 text-muted-foreground text-sm">
+                    <strong>Endereço Base:</strong> {pro.address}
+                  </p>
+                )}
               </div>
             </TabsContent>
 
@@ -190,8 +192,10 @@ const ProfessionalPage = () => {
                   <div key={review.id} className="bg-white p-6 rounded-2xl shadow-sm border">
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <p className="font-semibold text-secondary">{review.author}</p>
-                        <p className="text-sm text-muted-foreground">{review.date}</p>
+                        <p className="font-semibold text-secondary">{review.reviewer_name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(review.created_at).toLocaleDateString()}
+                        </p>
                       </div>
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
@@ -202,15 +206,20 @@ const ProfessionalPage = () => {
                         ))}
                       </div>
                     </div>
-                    <p className="text-secondary-foreground/80">{review.text}</p>
+                    <p className="text-secondary-foreground/80">{review.comment}</p>
                   </div>
                 ))}
+                {pro.reviews.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    Ainda não há avaliações para este profissional.
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>
 
           <div className="mt-16 animate-fade-in-up">
-            <ContextualAds categories={pro.categories} layout="grid" />
+            <ContextualAds categoryId={pro.category_id} layout="grid" />
           </div>
         </div>
       </div>
@@ -220,8 +229,7 @@ const ProfessionalPage = () => {
           className="w-full gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white h-12 text-lg rounded-xl shadow-lg"
           onClick={handleWhatsApp}
         >
-          <MessageCircle className="w-6 h-6" />
-          Falar no WhatsApp
+          <MessageCircle className="w-6 h-6" /> Falar no WhatsApp
         </Button>
       </div>
     </div>

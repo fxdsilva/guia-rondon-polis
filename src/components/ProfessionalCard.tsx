@@ -3,13 +3,15 @@ import { Star, MapPin, BadgeCheck, MessageCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Professional } from '@/stores/mockData'
+import { PopulatedProfessional } from '@/stores/main'
 
 interface Props {
-  pro: Professional
+  pro: PopulatedProfessional
 }
 
 export function ProfessionalCard({ pro }: Props) {
+  const isPremium = pro.plan?.id === 'plan-premium'
+
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault()
     const msg = encodeURIComponent(
@@ -41,7 +43,7 @@ export function ProfessionalCard({ pro }: Props) {
                 <h3 className="font-semibold text-lg truncate text-secondary group-hover:text-primary transition-colors">
                   {pro.name}
                 </h3>
-                {pro.premium && (
+                {isPremium && (
                   <Badge
                     variant="secondary"
                     className="bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 shrink-0"
@@ -51,11 +53,8 @@ export function ProfessionalCard({ pro }: Props) {
                 )}
               </div>
 
-              <p
-                className="text-sm text-muted-foreground mb-2 truncate"
-                title={pro.categories.join(', ')}
-              >
-                {pro.categories.join(', ')}
+              <p className="text-sm text-muted-foreground mb-2 truncate" title={pro.category?.name}>
+                {pro.category?.name || 'Profissional'}
               </p>
 
               <div className="flex items-center gap-1.5 text-sm font-medium">
@@ -70,7 +69,7 @@ export function ProfessionalCard({ pro }: Props) {
 
           <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="w-4 h-4 shrink-0" />
-            <span className="truncate">{pro.neighborhoods.join(', ')}</span>
+            <span className="truncate">{pro.neighborhood?.name || 'Atende Rondonópolis'}</span>
           </div>
 
           <div className="mt-auto pt-6">
@@ -78,8 +77,7 @@ export function ProfessionalCard({ pro }: Props) {
               onClick={handleWhatsApp}
               className="w-full gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white"
             >
-              <MessageCircle className="w-5 h-5" />
-              Chamar no WhatsApp
+              <MessageCircle className="w-5 h-5" /> Chamar no WhatsApp
             </Button>
           </div>
         </CardContent>

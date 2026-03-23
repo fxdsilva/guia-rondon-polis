@@ -1,15 +1,17 @@
 import { MapPin } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { useMemo } from 'react'
+import useMainStore from '@/stores/main'
 
-export function MapSection({ neighborhood }: { neighborhood?: string }) {
-  const [searchParams] = useSearchParams()
-  const bParam = searchParams.get('b')
+export function MapSection({ neighborhoodId }: { neighborhoodId?: string }) {
+  const { neighborhoods } = useMainStore()
 
-  const activeNeighborhood = neighborhood || (bParam ? bParam.split(',')[0] : null)
+  const activeNeighborhood = useMemo(() => {
+    return neighborhoods.find((n) => n.id === neighborhoodId)
+  }, [neighborhoodId, neighborhoods])
 
   const searchQuery =
-    activeNeighborhood && activeNeighborhood !== 'Todos os bairros'
-      ? `${encodeURIComponent(activeNeighborhood)}, Rondonópolis, MT`
+    activeNeighborhood && activeNeighborhood.name !== 'Todos os bairros'
+      ? `${encodeURIComponent(activeNeighborhood.name)}, Rondonópolis, MT`
       : '-16.4514215,-54.6308515'
 
   return (
@@ -19,8 +21,8 @@ export function MapSection({ neighborhood }: { neighborhood?: string }) {
           <div className="max-w-2xl">
             <h2 className="text-3xl font-bold text-secondary mb-3 flex items-center justify-center md:justify-start gap-2">
               <MapPin className="text-primary w-8 h-8 shrink-0" />
-              {activeNeighborhood && activeNeighborhood !== 'Todos os bairros'
-                ? `Explore a Região: ${activeNeighborhood}`
+              {activeNeighborhood && activeNeighborhood.name !== 'Todos os bairros'
+                ? `Explore a Região: ${activeNeighborhood.name}`
                 : 'Explore a Região de Rondonópolis'}
             </h2>
             <p className="text-muted-foreground text-lg">

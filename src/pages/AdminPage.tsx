@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Plus, Trash2, Edit2 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -16,21 +16,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { MultiSelect } from '@/components/MultiSelect'
-import { CATEGORY_OPTIONS, CATEGORY_GROUPS } from '@/stores/mockData'
 import useMainStore from '@/stores/main'
-
-const AD_TARGET_OPTIONS = [
-  ...Object.keys(CATEGORY_GROUPS).map((g) => ({
-    label: `Grupo: ${g}`,
-    value: g,
-    group: 'Grupos Inteiros',
-  })),
-  ...CATEGORY_OPTIONS,
-]
 
 const AdminPage = () => {
   const {
-    professionals,
+    populatedProfessionals,
+    categories,
     ads,
     togglePremium,
     toggleVerified,
@@ -39,6 +30,7 @@ const AdminPage = () => {
     updateAd,
     deleteAd,
   } = useMainStore()
+
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -53,6 +45,8 @@ const AdminPage = () => {
     link: '',
     targetCategories: [] as string[],
   })
+
+  const AD_TARGET_OPTIONS = categories.map((c) => ({ label: c.name, value: c.id, group: c.group }))
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -157,14 +151,14 @@ const AdminPage = () => {
             <TableHeader className="bg-muted/50">
               <TableRow>
                 <TableHead>Profissional</TableHead>
-                <TableHead>Categorias</TableHead>
+                <TableHead>Categoria</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-center">Premium</TableHead>
                 <TableHead className="text-center">Verificado</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {professionals.map((pro) => (
+              {populatedProfessionals.map((pro) => (
                 <TableRow key={pro.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -179,8 +173,8 @@ const AdminPage = () => {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate" title={pro.categories.join(', ')}>
-                    {pro.categories.join(', ')}
+                  <TableCell className="max-w-[200px] truncate" title={pro.category?.name}>
+                    {pro.category?.name || '-'}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="bg-green-50 text-green-700">
@@ -188,7 +182,10 @@ const AdminPage = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Switch checked={pro.premium} onCheckedChange={() => togglePremium(pro.id)} />
+                    <Switch
+                      checked={pro.plan?.id === 'plan-premium'}
+                      onCheckedChange={() => togglePremium(pro.id)}
+                    />
                   </TableCell>
                   <TableCell className="text-center">
                     <Switch checked={pro.verified} onCheckedChange={() => toggleVerified(pro.id)} />
@@ -314,13 +311,6 @@ const AdminPage = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-                {ads.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                      Nenhum anúncio cadastrado.
-                    </TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           </div>
