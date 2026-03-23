@@ -6,8 +6,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { MultiSelect } from '@/components/MultiSelect'
-import { CATEGORY_OPTIONS } from '@/stores/mockData'
+import { CATEGORY_OPTIONS, Ad } from '@/stores/mockData'
 import { ImageCropper } from '@/components/ImageCropper'
+import useMainStore from '@/stores/main'
 
 const Field = ({ label, ...props }: { label: string } & React.ComponentProps<'input'>) => (
   <div className="space-y-2">
@@ -18,6 +19,7 @@ const Field = ({ label, ...props }: { label: string } & React.ComponentProps<'in
 
 export default function AdvertisePage() {
   const { toast } = useToast()
+  const { addAd } = useMainStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGeneratingAI, setIsGeneratingAI] = useState(false)
 
@@ -64,28 +66,46 @@ export default function AdvertisePage() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      toast({
-        title: 'Solicitação Enviada!',
-        description: 'Nossa equipe entrará em contato em breve para apresentar os planos.',
-      })
-      setCompanyName('')
-      setContactName('')
-      setWhatsapp('')
-      setPhone('')
-      setEmail('')
-      setWebsite('')
-      setFacebook('')
-      setInstagram('')
-      setOtherLinks('')
-      setSegments([])
-      setMessage('')
-      setPhoto(null)
-    }, 1500)
+
+    const newAd: Ad = {
+      id: `ad_${Date.now()}`,
+      companyName,
+      description: message || `${companyName} - Atendimento de qualidade em Rondonópolis.`,
+      imageUrl: photo || 'https://img.usecurling.com/p/800/400?q=business&color=blue',
+      link: `https://wa.me/55${whatsapp.replace(/\D/g, '')}`,
+      targetCategories: segments,
+      active: true,
+      phone,
+      website,
+      facebook,
+      instagram,
+      isGeneral: segments.length === 0,
+    }
+
+    await addAd(newAd)
+
+    setIsSubmitting(false)
+    toast({
+      title: 'Solicitação Enviada com Sucesso!',
+      description:
+        'Sua empresa foi cadastrada no sistema e logo aparecerá na seção de Empresas Parceiras.',
+    })
+
+    setCompanyName('')
+    setContactName('')
+    setWhatsapp('')
+    setPhone('')
+    setEmail('')
+    setWebsite('')
+    setFacebook('')
+    setInstagram('')
+    setOtherLinks('')
+    setSegments([])
+    setMessage('')
+    setPhoto(null)
   }
 
   return (

@@ -19,7 +19,7 @@ export function MapSection() {
 
         <div className="w-full h-[450px] md:h-[500px] rounded-3xl overflow-hidden shadow-elevation border border-border relative bg-muted">
           <iframe
-            src="https://maps.google.com/maps?q=-16.4514215,-54.6308515&t=&z=14.25&ie=UTF8&iwloc=&output=embed"
+            src="https://maps.google.com/maps?q=-16.4514215,-54.6308515&z=14&output=embed"
             width="100%"
             height="100%"
             frameBorder="0"

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ import { CATEGORY_GROUPS, NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
 
 export function Hero() {
   const [query, setQuery] = useState('')
+  const [segment, setSegment] = useState('todos')
   const [category, setCategory] = useState('todas')
   const [neighborhoods, setNeighborhoods] = useState<string[]>([])
   const navigate = useNavigate()
@@ -27,8 +28,19 @@ export function Hero() {
     if (query) params.set('q', query)
     if (neighborhoods.length > 0) params.set('b', neighborhoods.join(','))
 
-    const targetSlug = category === 'todas' ? 'todas' : category.toLowerCase().replace(/\s+/g, '-')
+    let targetSlug = 'todas'
+    if (category !== 'todas') {
+      targetSlug = category.toLowerCase().replace(/\s+/g, '-')
+    } else if (segment !== 'todos') {
+      targetSlug = segment.toLowerCase().replace(/\s+/g, '-')
+    }
+
     navigate(`/categoria/${targetSlug}?${params.toString()}`)
+  }
+
+  const handleSegmentChange = (val: string) => {
+    setSegment(val)
+    setCategory('todas')
   }
 
   return (
@@ -52,10 +64,30 @@ export function Hero() {
 
         <form
           onSubmit={handleSearch}
-          className="w-full max-w-5xl flex flex-col md:flex-row gap-3 bg-white p-3 rounded-2xl shadow-xl animate-fade-in-up"
+          className="w-full max-w-6xl flex flex-col md:flex-row gap-3 bg-white p-3 rounded-2xl shadow-xl animate-fade-in-up"
           style={{ animationDelay: '200ms' }}
         >
-          <div className="w-full md:w-64 shrink-0">
+          <div className="w-full md:w-56 shrink-0">
+            <Select value={segment} onValueChange={handleSegmentChange}>
+              <SelectTrigger className="h-12 border-0 bg-transparent shadow-none focus:ring-0 text-base font-medium">
+                <SelectValue placeholder="Segmento" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[350px]">
+                <SelectItem value="todos" className="font-semibold">
+                  Todos os segmentos
+                </SelectItem>
+                {Object.keys(CATEGORY_GROUPS).map((group) => (
+                  <SelectItem key={group} value={group}>
+                    {group}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="w-px h-8 bg-border hidden md:block self-center mx-1" />
+
+          <div className="w-full md:w-56 shrink-0">
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="h-12 border-0 bg-transparent shadow-none focus:ring-0 text-base font-medium">
                 <SelectValue placeholder="Categoria" />
@@ -64,18 +96,24 @@ export function Hero() {
                 <SelectItem value="todas" className="font-semibold">
                   Todas as categorias
                 </SelectItem>
-                {Object.entries(CATEGORY_GROUPS).map(([group, cats]) => (
-                  <SelectGroup key={group}>
-                    <SelectLabel className="text-muted-foreground bg-muted/50 mt-1">
-                      {group}
-                    </SelectLabel>
-                    {cats.map((c) => (
+                {segment === 'todos'
+                  ? Object.entries(CATEGORY_GROUPS).map(([group, cats]) => (
+                      <SelectGroup key={group}>
+                        <SelectLabel className="text-muted-foreground bg-muted/50 mt-1">
+                          {group}
+                        </SelectLabel>
+                        {cats.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))
+                  : CATEGORY_GROUPS[segment as keyof typeof CATEGORY_GROUPS]?.map((c) => (
                       <SelectItem key={c} value={c}>
                         {c}
                       </SelectItem>
                     ))}
-                  </SelectGroup>
-                ))}
               </SelectContent>
             </Select>
           </div>
@@ -85,7 +123,7 @@ export function Hero() {
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
             <Input
-              placeholder="O que você precisa? (ex: vazamento)"
+              placeholder="O que você precisa?"
               className="pl-10 h-12 text-base border-0 focus-visible:ring-0 shadow-none bg-transparent"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -94,7 +132,7 @@ export function Hero() {
 
           <div className="w-px h-8 bg-border hidden md:block self-center mx-1" />
 
-          <div className="w-full md:w-[280px] shrink-0">
+          <div className="w-full md:w-[240px] shrink-0">
             <MultiSelect
               options={NEIGHBORHOOD_OPTIONS}
               selected={neighborhoods}
