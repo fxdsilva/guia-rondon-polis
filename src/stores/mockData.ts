@@ -26,6 +26,16 @@ export type Professional = {
   workingHours: string
 }
 
+export type Ad = {
+  id: string
+  companyName: string
+  description: string
+  imageUrl: string
+  link: string
+  targetCategories: string[]
+  active: boolean
+}
+
 export const CATEGORY_GROUPS = {
   'Casa e Construção': [
     'Pedreiro',
@@ -307,5 +317,45 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     ],
     reviews: MOCK_REVIEWS,
     workingHours: 'Seg-Sexta: 09h às 18h',
+  },
+]
+
+export const MOCK_ADS: Ad[] = [
+  {
+    id: 'ad1',
+    companyName: 'ConstruMax Materiais',
+    description: 'Tudo para sua obra com os melhores preços. Entrega rápida em toda Rondonópolis!',
+    imageUrl: 'https://img.usecurling.com/p/800/400?q=construction%20materials&color=orange',
+    link: 'https://wa.me/5566999999999',
+    targetCategories: ['Casa e Construção', 'Pedreiro', 'Pintor', 'Marceneiro', 'Encanador'],
+    active: true,
+  },
+  {
+    id: 'ad2',
+    companyName: 'AutoPeças Rondon',
+    description: 'Peças originais e paralelas para todas as marcas. Venha conferir nosso estoque.',
+    imageUrl: 'https://img.usecurling.com/p/800/400?q=auto%20parts&color=blue',
+    link: 'https://wa.me/5566999999998',
+    targetCategories: ['Automotivo', 'Mecânico', 'Bateria automotiva', 'Lava jato'],
+    active: true,
+  },
+  {
+    id: 'ad3',
+    companyName: 'TechStore Informática',
+    description: 'Acessórios, peças e equipamentos de TI com garantia e procedência garantida.',
+    imageUrl: 'https://img.usecurling.com/p/800/400?q=computer%20parts&color=purple',
+    link: 'https://wa.me/5566999999997',
+    targetCategories: ['Tecnologia', 'Informática', 'Conserto de celular'],
+    active: true,
+  },
+  {
+    id: 'ad4',
+    companyName: 'Supermercado Central',
+    description:
+      'Produtos de limpeza profissional para deixar tudo brilhando. Ofertas imperdíveis.',
+    imageUrl: 'https://img.usecurling.com/p/800/400?q=cleaning%20products&color=cyan',
+    link: 'https://wa.me/5566999999996',
+    targetCategories: ['Serviços Domésticos', 'Diarista', 'Faxineira'],
+    active: true,
   },
 ]

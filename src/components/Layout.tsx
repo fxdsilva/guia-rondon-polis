@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Menu, MessageCircle, MapPin, ChevronDown } from 'lucide-react'
+import { Menu, MessageCircle, MapPin, ChevronDown, Megaphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import {
@@ -48,12 +48,6 @@ export default function Layout() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Link
-        to={currentUserId ? '/editar-perfil' : '/cadastrar'}
-        className="text-sm font-medium hover:text-primary transition-colors py-2"
-      >
-        {currentUserId ? 'Editar Perfil' : 'Anuncie seu Serviço'}
-      </Link>
       <Link to="/admin" className="text-sm font-medium hover:text-primary transition-colors py-2">
         Admin
       </Link>
@@ -69,21 +63,29 @@ export default function Layout() {
             <span className="font-bold text-xl text-secondary">Guia Rondonópolis</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6">
             <NavLinks />
-            {!currentUserId ? (
-              <Button asChild className="shadow-sm hover:shadow-md transition-all font-semibold">
-                <Link to="/cadastrar">Anuncie seu Serviço</Link>
-              </Button>
-            ) : (
-              <Button
-                asChild
-                variant="outline"
-                className="shadow-sm hover:shadow-md transition-all font-semibold"
+            <div className="flex items-center gap-4 border-l pl-6 ml-2">
+              <Link
+                to="/anunciar-empresa"
+                className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
               >
-                <Link to={`/profissional/${currentUserId}`}>Meu Perfil</Link>
-              </Button>
-            )}
+                <Megaphone className="w-4 h-4" /> Divulgue sua Marca
+              </Link>
+              {!currentUserId ? (
+                <Button asChild className="shadow-sm hover:shadow-md transition-all font-semibold">
+                  <Link to="/cadastrar">Anuncie seu Serviço</Link>
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  variant="outline"
+                  className="shadow-sm hover:shadow-md transition-all font-semibold"
+                >
+                  <Link to={`/profissional/${currentUserId}`}>Meu Perfil</Link>
+                </Button>
+              )}
+            </div>
           </nav>
 
           <Sheet>
@@ -102,7 +104,13 @@ export default function Layout() {
               </SheetHeader>
               <nav className="flex flex-col gap-2 mt-6 items-start w-full">
                 <NavLinks />
-                <div className="w-full mt-6 pt-6 border-t">
+                <div className="w-full mt-6 pt-6 border-t flex flex-col gap-4">
+                  <Link
+                    to="/anunciar-empresa"
+                    className="flex items-center justify-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors w-full py-2.5 border rounded-md"
+                  >
+                    <Megaphone className="w-4 h-4" /> Divulgue sua Marca
+                  </Link>
                   {!currentUserId ? (
                     <Button asChild className="w-full font-semibold">
                       <Link to="/cadastrar">Anuncie seu Serviço</Link>
@@ -155,12 +163,12 @@ export default function Layout() {
                 </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/anunciar-empresa"
                   className="text-sm text-secondary-foreground/80 hover:text-white transition-colors"
                 >
-                  Termos de Uso
-                </a>
+                  Divulgue sua Marca
+                </Link>
               </li>
             </ul>
           </div>

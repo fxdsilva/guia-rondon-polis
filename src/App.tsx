@@ -10,6 +10,7 @@ import ProfessionalPage from './pages/ProfessionalPage'
 import RegisterPage from './pages/RegisterPage'
 import EditProfilePage from './pages/EditProfilePage'
 import AdminPage from './pages/AdminPage'
+import AdvertisePage from './pages/AdvertisePage'
 import NotFound from './pages/NotFound'
 
 const App = () => (
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/profissional/:id" element={<ProfessionalPage />} />
             <Route path="/cadastrar" element={<RegisterPage />} />
             <Route path="/editar-perfil" element={<EditProfilePage />} />
+            <Route path="/anunciar-empresa" element={<AdvertisePage />} />
             <Route path="/admin" element={<AdminPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />

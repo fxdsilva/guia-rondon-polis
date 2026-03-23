@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select'
 import { ProfessionalCard } from '@/components/ProfessionalCard'
 import { MultiSelect } from '@/components/MultiSelect'
+import { ContextualAds } from '@/components/ContextualAds'
 import useMainStore from '@/stores/main'
 import { NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
 
@@ -153,6 +154,10 @@ const CategoryPage = () => {
               </Button>
             )}
           </div>
+
+          {slug && slug !== 'todas' && (
+            <ContextualAds categories={[categoryName]} layout="vertical" />
+          )}
         </aside>
 
         <div className="flex-1">

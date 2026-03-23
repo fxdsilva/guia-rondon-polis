@@ -4,6 +4,7 @@ import { Edit3, Star, MapPin, BadgeCheck, MessageCircle, Clock, CheckCircle2 } f
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ContextualAds } from '@/components/ContextualAds'
 import useMainStore from '@/stores/main'
 import NotFound from './NotFound'
 
@@ -207,6 +208,10 @@ const ProfessionalPage = () => {
               </div>
             </TabsContent>
           </Tabs>
+
+          <div className="mt-16 animate-fade-in-up">
+            <ContextualAds categories={pro.categories} layout="grid" />
+          </div>
         </div>
       </div>
 
