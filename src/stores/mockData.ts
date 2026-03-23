@@ -34,6 +34,11 @@ export type Ad = {
   link: string
   targetCategories: string[]
   active: boolean
+  phone?: string
+  website?: string
+  facebook?: string
+  instagram?: string
+  isGeneral?: boolean
 }
 
 export const CATEGORY_GROUPS = {
@@ -329,6 +334,10 @@ export const MOCK_ADS: Ad[] = [
     link: 'https://wa.me/5566999999999',
     targetCategories: ['Casa e Construção', 'Pedreiro', 'Pintor', 'Marceneiro', 'Encanador'],
     active: true,
+    phone: '5566999999999',
+    website: 'https://exemplo.com',
+    instagram: 'https://instagram.com',
+    facebook: 'https://facebook.com',
   },
   {
     id: 'ad2',
@@ -338,6 +347,8 @@ export const MOCK_ADS: Ad[] = [
     link: 'https://wa.me/5566999999998',
     targetCategories: ['Automotivo', 'Mecânico', 'Bateria automotiva', 'Lava jato'],
     active: true,
+    phone: '5566999999998',
+    instagram: 'https://instagram.com',
   },
   {
     id: 'ad3',
@@ -347,6 +358,8 @@ export const MOCK_ADS: Ad[] = [
     link: 'https://wa.me/5566999999997',
     targetCategories: ['Tecnologia', 'Informática', 'Conserto de celular'],
     active: true,
+    phone: '5566999999997',
+    website: 'https://exemplo.com',
   },
   {
     id: 'ad4',
@@ -357,5 +370,33 @@ export const MOCK_ADS: Ad[] = [
     link: 'https://wa.me/5566999999996',
     targetCategories: ['Serviços Domésticos', 'Diarista', 'Faxineira'],
     active: true,
+    phone: '5566999999996',
+    instagram: 'https://instagram.com',
+    facebook: 'https://facebook.com',
+  },
+  {
+    id: 'ad5',
+    companyName: 'Rondonópolis Seguros',
+    description:
+      'Proteção para você, sua família e seus negócios. Faça uma cotação sem compromisso.',
+    imageUrl: 'https://img.usecurling.com/p/800/400?q=insurance&color=blue',
+    link: 'https://wa.me/5566999999995',
+    targetCategories: [],
+    active: true,
+    phone: '5566999999995',
+    website: 'https://exemplo.com',
+    isGeneral: true,
+  },
+  {
+    id: 'ad6',
+    companyName: 'Restaurante Sabor Local',
+    description: 'Comida caseira deliciosa e marmitas com entrega rápida em toda a cidade.',
+    imageUrl: 'https://img.usecurling.com/p/800/400?q=restaurant%20food&color=red',
+    link: 'https://wa.me/5566999999994',
+    targetCategories: [],
+    active: true,
+    phone: '5566999999994',
+    instagram: 'https://instagram.com',
+    isGeneral: true,
   },
 ]
