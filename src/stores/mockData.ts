@@ -74,25 +74,31 @@ export type Ad = {
   isGeneral?: boolean
 }
 
+export const PLAN_FREE_ID = 'b0000000-0000-4000-8000-000000000001'
+export const PLAN_PREMIUM_ID = 'b0000000-0000-4000-8000-000000000002'
+export const PLAN_PENDING_ID = 'b0000000-0000-4000-8000-000000000003'
+export const NB_ALL_ID = 'a0000000-0000-4000-8000-000000000006'
+
 export const MOCK_PLANS: Plan[] = [
   {
-    id: 'plan-free',
+    id: PLAN_FREE_ID,
     name: 'Gratuito',
     price: 0,
     features: ['Perfil básico', 'Aparece nas buscas'],
   },
   {
-    id: 'plan-premium',
+    id: PLAN_PREMIUM_ID,
     name: 'Premium',
     price: 0,
     features: ['Destaque nas buscas', 'Selo Premium', 'Galeria de fotos expandida'],
   },
+  { id: PLAN_PENDING_ID, name: 'Pendente', price: 0, features: ['Aguardando aprovação'] },
 ]
 
 export const MOCK_CATEGORIES: Category[] = [
   // 🏠 Casa e Construção
   {
-    id: 'c11',
+    id: 'c0000000-0000-4000-8000-000000000001',
     name: 'Pedreiro',
     slug: 'pedreiro',
     emoji: '🧱',
@@ -101,7 +107,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'hammer',
   },
   {
-    id: 'c8',
+    id: 'c0000000-0000-4000-8000-000000000002',
     name: 'Pintor',
     slug: 'pintor',
     emoji: '🎨',
@@ -110,7 +116,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'paintbrush',
   },
   {
-    id: 'c12',
+    id: 'c0000000-0000-4000-8000-000000000003',
     name: 'Marceneiro',
     slug: 'marceneiro',
     emoji: '🪵',
@@ -119,7 +125,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'hammer',
   },
   {
-    id: 'c13',
+    id: 'c0000000-0000-4000-8000-000000000004',
     name: 'Vidraceiro',
     slug: 'vidraceiro',
     emoji: '🪟',
@@ -128,7 +134,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'hammer',
   },
   {
-    id: 'c14',
+    id: 'c0000000-0000-4000-8000-000000000005',
     name: 'Gesseiro',
     slug: 'gesseiro',
     emoji: '🏢',
@@ -137,7 +143,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'hammer',
   },
   {
-    id: 'c15',
+    id: 'c0000000-0000-4000-8000-000000000006',
     name: 'Azulejista',
     slug: 'azulejista',
     emoji: '📏',
@@ -146,7 +152,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'hammer',
   },
   {
-    id: 'c16',
+    id: 'c0000000-0000-4000-8000-000000000007',
     name: 'Reformas em geral',
     slug: 'reformas-em-geral',
     emoji: '🏗️',
@@ -154,10 +160,9 @@ export const MOCK_CATEGORIES: Category[] = [
     groupEmoji: '🏠',
     icon: 'hammer',
   },
-
   // ⚡ Manutenção e Técnicos
   {
-    id: 'c1',
+    id: 'c0000000-0000-4000-8000-000000000008',
     name: 'Eletricista',
     slug: 'eletricista',
     emoji: '⚡',
@@ -166,7 +171,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'zap',
   },
   {
-    id: 'c2',
+    id: 'c0000000-0000-4000-8000-000000000009',
     name: 'Encanador',
     slug: 'encanador',
     emoji: '🪠',
@@ -175,7 +180,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'wrench',
   },
   {
-    id: 'c17',
+    id: 'c0000000-0000-4000-8000-000000000010',
     name: 'Ar-condicionado',
     slug: 'ar-condicionado',
     emoji: '❄️',
@@ -184,7 +189,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'wind',
   },
   {
-    id: 'c18',
+    id: 'c0000000-0000-4000-8000-000000000011',
     name: 'Instalação elétrica',
     slug: 'instalacao-eletrica',
     emoji: '🔌',
@@ -193,7 +198,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'zap',
   },
   {
-    id: 'c19',
+    id: 'c0000000-0000-4000-8000-000000000012',
     name: 'Aquecedor',
     slug: 'aquecedor',
     emoji: '🔥',
@@ -202,7 +207,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'zap',
   },
   {
-    id: 'c20',
+    id: 'c0000000-0000-4000-8000-000000000013',
     name: 'Técnico em eletrodomésticos',
     slug: 'tecnico-em-eletrodomesticos',
     emoji: '📻',
@@ -210,10 +215,9 @@ export const MOCK_CATEGORIES: Category[] = [
     groupEmoji: '⚡',
     icon: 'wrench',
   },
-
   // 🧹 Serviços Domésticos
   {
-    id: 'c3',
+    id: 'c0000000-0000-4000-8000-000000000014',
     name: 'Diarista',
     slug: 'diarista',
     emoji: '🧹',
@@ -222,7 +226,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c21',
+    id: 'c0000000-0000-4000-8000-000000000015',
     name: 'Faxineira',
     slug: 'faxineira',
     emoji: '🧼',
@@ -231,7 +235,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c22',
+    id: 'c0000000-0000-4000-8000-000000000016',
     name: 'Babá',
     slug: 'baba',
     emoji: '👶',
@@ -240,7 +244,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c23',
+    id: 'c0000000-0000-4000-8000-000000000017',
     name: 'Cuidador de idosos',
     slug: 'cuidador-de-idosos',
     emoji: '👵',
@@ -249,7 +253,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c24',
+    id: 'c0000000-0000-4000-8000-000000000018',
     name: 'Pet sitter',
     slug: 'pet-sitter',
     emoji: '🐕',
@@ -257,10 +261,9 @@ export const MOCK_CATEGORIES: Category[] = [
     groupEmoji: '🧹',
     icon: 'sparkles',
   },
-
   // 🚗 Automotivo
   {
-    id: 'c25',
+    id: 'c0000000-0000-4000-8000-000000000019',
     name: 'Mecânico',
     slug: 'mecanico',
     emoji: '🔧',
@@ -269,7 +272,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'car',
   },
   {
-    id: 'c26',
+    id: 'c0000000-0000-4000-8000-000000000020',
     name: 'Guincho',
     slug: 'guincho',
     emoji: '🛻',
@@ -278,7 +281,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'car',
   },
   {
-    id: 'c27',
+    id: 'c0000000-0000-4000-8000-000000000021',
     name: 'Bateria automotiva',
     slug: 'bateria-automotiva',
     emoji: '🔋',
@@ -287,7 +290,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'car',
   },
   {
-    id: 'c28',
+    id: 'c0000000-0000-4000-8000-000000000022',
     name: 'Lava jato',
     slug: 'lava-jato',
     emoji: '🧽',
@@ -296,7 +299,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'car',
   },
   {
-    id: 'c29',
+    id: 'c0000000-0000-4000-8000-000000000023',
     name: 'Borracharia',
     slug: 'borracharia',
     emoji: '🛞',
@@ -305,7 +308,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'car',
   },
   {
-    id: 'c30',
+    id: 'c0000000-0000-4000-8000-000000000024',
     name: 'Funilaria',
     slug: 'funilaria',
     emoji: '🔨',
@@ -313,10 +316,9 @@ export const MOCK_CATEGORIES: Category[] = [
     groupEmoji: '🚗',
     icon: 'car',
   },
-
   // 💻 Tecnologia
   {
-    id: 'c7',
+    id: 'c0000000-0000-4000-8000-000000000025',
     name: 'Informática',
     slug: 'informatica',
     emoji: '💻',
@@ -325,7 +327,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'monitor',
   },
   {
-    id: 'c31',
+    id: 'c0000000-0000-4000-8000-000000000026',
     name: 'Conserto de celular',
     slug: 'conserto-de-celular',
     emoji: '📱',
@@ -334,7 +336,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'monitor',
   },
   {
-    id: 'c32',
+    id: 'c0000000-0000-4000-8000-000000000027',
     name: 'Instalação de internet',
     slug: 'instalacao-de-internet',
     emoji: '🌐',
@@ -343,7 +345,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'monitor',
   },
   {
-    id: 'c33',
+    id: 'c0000000-0000-4000-8000-000000000028',
     name: 'Câmeras de segurança',
     slug: 'cameras-de-seguranca',
     emoji: '📹',
@@ -352,7 +354,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'monitor',
   },
   {
-    id: 'c34',
+    id: 'c0000000-0000-4000-8000-000000000029',
     name: 'Redes e Wi-Fi',
     slug: 'redes-e-wifi',
     emoji: '📶',
@@ -360,10 +362,9 @@ export const MOCK_CATEGORIES: Category[] = [
     groupEmoji: '💻',
     icon: 'monitor',
   },
-
   // 🌿 Serviços Externos
   {
-    id: 'c35',
+    id: 'c0000000-0000-4000-8000-000000000030',
     name: 'Jardinagem',
     slug: 'jardinagem',
     emoji: '🌿',
@@ -372,7 +373,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'wind',
   },
   {
-    id: 'c36',
+    id: 'c0000000-0000-4000-8000-000000000031',
     name: 'Paisagismo',
     slug: 'paisagismo',
     emoji: '🌳',
@@ -381,7 +382,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'wind',
   },
   {
-    id: 'c37',
+    id: 'c0000000-0000-4000-8000-000000000032',
     name: 'Roçagem de lote',
     slug: 'rocagem-de-lote',
     emoji: '🚜',
@@ -390,7 +391,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'wind',
   },
   {
-    id: 'c38',
+    id: 'c0000000-0000-4000-8000-000000000033',
     name: 'Limpeza de terreno',
     slug: 'limpeza-de-terreno',
     emoji: '🗑️',
@@ -399,7 +400,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'wind',
   },
   {
-    id: 'c39',
+    id: 'c0000000-0000-4000-8000-000000000034',
     name: 'Caçamba (entulho)',
     slug: 'cacamba-entulho',
     emoji: '🏗️',
@@ -407,10 +408,9 @@ export const MOCK_CATEGORIES: Category[] = [
     groupEmoji: '🌿',
     icon: 'wind',
   },
-
   // 🎉 Eventos
   {
-    id: 'c40',
+    id: 'c0000000-0000-4000-8000-000000000035',
     name: 'DJ',
     slug: 'dj',
     emoji: '🎧',
@@ -419,7 +419,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c41',
+    id: 'c0000000-0000-4000-8000-000000000036',
     name: 'Fotógrafo',
     slug: 'fotografo',
     emoji: '📸',
@@ -428,7 +428,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c42',
+    id: 'c0000000-0000-4000-8000-000000000037',
     name: 'Filmagem',
     slug: 'filmagem',
     emoji: '🎥',
@@ -437,7 +437,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c43',
+    id: 'c0000000-0000-4000-8000-000000000038',
     name: 'Decoração',
     slug: 'decoracao',
     emoji: '🎈',
@@ -446,7 +446,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c44',
+    id: 'c0000000-0000-4000-8000-000000000039',
     name: 'Buffet',
     slug: 'buffet',
     emoji: '🍽️',
@@ -454,10 +454,9 @@ export const MOCK_CATEGORIES: Category[] = [
     groupEmoji: '🎉',
     icon: 'sparkles',
   },
-
   // 🧑‍🔧 Profissionais Especializados
   {
-    id: 'c45',
+    id: 'c0000000-0000-4000-8000-000000000040',
     name: 'Advogado',
     slug: 'advogado',
     emoji: '⚖️',
@@ -466,7 +465,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'briefcase',
   },
   {
-    id: 'c46',
+    id: 'c0000000-0000-4000-8000-000000000041',
     name: 'Contador',
     slug: 'contador',
     emoji: '📊',
@@ -475,7 +474,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'briefcase',
   },
   {
-    id: 'c47',
+    id: 'c0000000-0000-4000-8000-000000000042',
     name: 'Personal trainer',
     slug: 'personal-trainer',
     emoji: '💪',
@@ -484,7 +483,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'briefcase',
   },
   {
-    id: 'c48',
+    id: 'c0000000-0000-4000-8000-000000000043',
     name: 'Cabeleireiro',
     slug: 'cabeleireiro',
     emoji: '✂️',
@@ -493,7 +492,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'briefcase',
   },
   {
-    id: 'c49',
+    id: 'c0000000-0000-4000-8000-000000000044',
     name: 'Manicure',
     slug: 'manicure',
     emoji: '💅',
@@ -501,10 +500,9 @@ export const MOCK_CATEGORIES: Category[] = [
     groupEmoji: '🧑‍🔧',
     icon: 'briefcase',
   },
-
   // 🐾 Pets
   {
-    id: 'c50',
+    id: 'c0000000-0000-4000-8000-000000000045',
     name: 'Banho e tosa',
     slug: 'banho-e-tosa',
     emoji: '🛁',
@@ -513,7 +511,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c51',
+    id: 'c0000000-0000-4000-8000-000000000046',
     name: 'Adestrador',
     slug: 'adestrador',
     emoji: '🐕‍🦺',
@@ -522,7 +520,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'sparkles',
   },
   {
-    id: 'c52',
+    id: 'c0000000-0000-4000-8000-000000000047',
     name: 'Veterinário',
     slug: 'veterinario',
     emoji: '🩺',
@@ -530,10 +528,9 @@ export const MOCK_CATEGORIES: Category[] = [
     groupEmoji: '🐾',
     icon: 'sparkles',
   },
-
   // 🚚 Transporte e Frete
   {
-    id: 'c53',
+    id: 'c0000000-0000-4000-8000-000000000048',
     name: 'Frete',
     slug: 'frete',
     emoji: '🚚',
@@ -542,7 +539,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'truck',
   },
   {
-    id: 'c54',
+    id: 'c0000000-0000-4000-8000-000000000049',
     name: 'Mudança',
     slug: 'mudanca',
     emoji: '📦',
@@ -551,7 +548,7 @@ export const MOCK_CATEGORIES: Category[] = [
     icon: 'truck',
   },
   {
-    id: 'c55',
+    id: 'c0000000-0000-4000-8000-000000000050',
     name: 'Entregador',
     slug: 'entregador',
     emoji: '🛵',
@@ -562,35 +559,53 @@ export const MOCK_CATEGORIES: Category[] = [
 ]
 
 export const MOCK_NEIGHBORHOODS: Neighborhood[] = [
-  { id: 'n1', name: 'Centro', latitude: -16.4674, longitude: -54.6382, group: 'Centro e região' },
-  { id: 'n2', name: 'Vila Aurora', latitude: -16.475, longitude: -54.64, group: 'Centro e região' },
   {
-    id: 'n3',
+    id: 'a0000000-0000-4000-8000-000000000001',
+    name: 'Centro',
+    latitude: -16.4674,
+    longitude: -54.6382,
+    group: 'Centro e região',
+  },
+  {
+    id: 'a0000000-0000-4000-8000-000000000002',
+    name: 'Vila Aurora',
+    latitude: -16.475,
+    longitude: -54.64,
+    group: 'Centro e região',
+  },
+  {
+    id: 'a0000000-0000-4000-8000-000000000003',
     name: 'Parque Sagrada Família',
     latitude: -16.45,
     longitude: -54.62,
     group: 'Região Sagrada Família',
   },
   {
-    id: 'n4',
+    id: 'a0000000-0000-4000-8000-000000000004',
     name: 'Jardim Atlântico',
     latitude: -16.48,
     longitude: -54.65,
     group: 'Região Atlântico',
   },
   {
-    id: 'n5',
+    id: 'a0000000-0000-4000-8000-000000000005',
     name: 'Vila Operária',
     latitude: -16.49,
     longitude: -54.61,
     group: 'Região Vila Operária',
   },
-  { id: 'n6', name: 'Todos os bairros', latitude: -16.4514, longitude: -54.6308, group: 'Geral' },
+  {
+    id: NB_ALL_ID,
+    name: 'Todos os bairros',
+    latitude: -16.4514,
+    longitude: -54.6308,
+    group: 'Geral',
+  },
 ]
 
 export const MOCK_PROFESSIONALS: Professional[] = [
   {
-    id: 'p1',
+    id: 'd0000000-0000-4000-8000-000000000001',
     name: 'Roberto Carlos',
     email: 'roberto@example.com',
     phone: '5566999999999',
@@ -599,9 +614,9 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     address: 'Av. Amazonas, 1000, Centro',
     latitude: -16.4674,
     longitude: -54.6382,
-    category_id: 'c1',
-    neighborhood_id: 'n1',
-    plan_id: 'plan-premium',
+    category_id: 'c0000000-0000-4000-8000-000000000008',
+    neighborhood_id: 'a0000000-0000-4000-8000-000000000001',
+    plan_id: PLAN_PREMIUM_ID,
     verified: true,
     image: 'https://img.usecurling.com/ppl/medium?gender=male&seed=1',
     gallery: [
@@ -614,14 +629,14 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     subscription_status: 'active',
   },
   {
-    id: 'p2',
+    id: 'd0000000-0000-4000-8000-000000000002',
     name: 'Ana Souza',
     phone: '5566999999998',
     description:
       'Limpeza pesada e organização de ambientes. Deixo sua casa brilhando com produtos de alta qualidade e muito capricho.',
-    category_id: 'c3',
-    neighborhood_id: 'n3',
-    plan_id: 'plan-premium',
+    category_id: 'c0000000-0000-4000-8000-000000000014',
+    neighborhood_id: 'a0000000-0000-4000-8000-000000000003',
+    plan_id: PLAN_PREMIUM_ID,
     verified: true,
     image: 'https://img.usecurling.com/ppl/medium?gender=female&seed=2',
     gallery: [
@@ -633,14 +648,14 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     subscription_status: 'active',
   },
   {
-    id: 'p3',
+    id: 'd0000000-0000-4000-8000-000000000003',
     name: 'Marcos Paulo',
     phone: '5566999999997',
     description:
       'Encanador especializado em detecção de vazamentos e desentupimentos sem quebra-quebra.',
-    category_id: 'c2',
-    neighborhood_id: 'n4',
-    plan_id: 'plan-free',
+    category_id: 'c0000000-0000-4000-8000-000000000009',
+    neighborhood_id: 'a0000000-0000-4000-8000-000000000004',
+    plan_id: PLAN_FREE_ID,
     verified: false,
     image: 'https://img.usecurling.com/ppl/medium?gender=male&seed=3',
     gallery: [
@@ -651,14 +666,14 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     subscription_status: 'expired',
   },
   {
-    id: 'p4',
+    id: 'd0000000-0000-4000-8000-000000000004',
     name: 'Claudio Pinturas',
     phone: '5566999999996',
     description:
       'Renove as cores da sua vida! Pintura residencial e comercial com acabamento impecável.',
-    category_id: 'c8',
-    neighborhood_id: 'n2',
-    plan_id: 'plan-premium',
+    category_id: 'c0000000-0000-4000-8000-000000000002',
+    neighborhood_id: 'a0000000-0000-4000-8000-000000000002',
+    plan_id: PLAN_PREMIUM_ID,
     verified: true,
     image: 'https://img.usecurling.com/ppl/medium?gender=male&seed=4',
     gallery: [
@@ -669,15 +684,15 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     subscription_status: 'active',
   },
   {
-    id: 'p5',
+    id: 'd0000000-0000-4000-8000-000000000005',
     name: 'Tech Fix Soluções',
     phone: '5566999999995',
     description:
       'Seu computador parou? Nós resolvemos. Formatação, troca de peças e montagem de PC Gamer.',
     address: 'Av. Bandeirantes, 250, Vila Operária',
-    category_id: 'c7',
-    neighborhood_id: 'n5',
-    plan_id: 'plan-free',
+    category_id: 'c0000000-0000-4000-8000-000000000025',
+    neighborhood_id: 'a0000000-0000-4000-8000-000000000005',
+    plan_id: PLAN_FREE_ID,
     verified: true,
     image: 'https://img.usecurling.com/ppl/medium?gender=male&seed=5',
     gallery: [
@@ -689,39 +704,83 @@ export const MOCK_PROFESSIONALS: Professional[] = [
 ]
 
 export const MOCK_SERVICES: Service[] = [
-  { id: 's1', professional_id: 'p1', name: 'Troca de fiação' },
-  { id: 's2', professional_id: 'p1', name: 'Instalação de disjuntores' },
-  { id: 's3', professional_id: 'p1', name: 'Projetos luminotécnicos' },
-  { id: 's4', professional_id: 'p2', name: 'Limpeza pós-obra' },
-  { id: 's5', professional_id: 'p2', name: 'Faxina geral' },
-  { id: 's6', professional_id: 'p3', name: 'Caça-vazamento' },
-  { id: 's7', professional_id: 'p3', name: 'Desentupimento' },
-  { id: 's8', professional_id: 'p4', name: 'Pintura interna' },
-  { id: 's9', professional_id: 'p4', name: 'Pintura externa' },
-  { id: 's10', professional_id: 'p5', name: 'Formatação' },
-  { id: 's11', professional_id: 'p5', name: 'Montagem de PC' },
+  {
+    id: 'e0000000-0000-4000-8000-000000000001',
+    professional_id: 'd0000000-0000-4000-8000-000000000001',
+    name: 'Troca de fiação',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000002',
+    professional_id: 'd0000000-0000-4000-8000-000000000001',
+    name: 'Instalação de disjuntores',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000003',
+    professional_id: 'd0000000-0000-4000-8000-000000000001',
+    name: 'Projetos luminotécnicos',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000004',
+    professional_id: 'd0000000-0000-4000-8000-000000000002',
+    name: 'Limpeza pós-obra',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000005',
+    professional_id: 'd0000000-0000-4000-8000-000000000002',
+    name: 'Faxina geral',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000006',
+    professional_id: 'd0000000-0000-4000-8000-000000000003',
+    name: 'Caça-vazamento',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000007',
+    professional_id: 'd0000000-0000-4000-8000-000000000003',
+    name: 'Desentupimento',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000008',
+    professional_id: 'd0000000-0000-4000-8000-000000000004',
+    name: 'Pintura interna',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000009',
+    professional_id: 'd0000000-0000-4000-8000-000000000004',
+    name: 'Pintura externa',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000010',
+    professional_id: 'd0000000-0000-4000-8000-000000000005',
+    name: 'Formatação',
+  },
+  {
+    id: 'e0000000-0000-4000-8000-000000000011',
+    professional_id: 'd0000000-0000-4000-8000-000000000005',
+    name: 'Montagem de PC',
+  },
 ]
 
 export const MOCK_REVIEWS: Review[] = [
   {
-    id: 'r1',
-    professional_id: 'p1',
+    id: 'r0000000-0000-4000-8000-000000000001',
+    professional_id: 'd0000000-0000-4000-8000-000000000001',
     reviewer_name: 'João Silva',
     rating: 5,
     comment: 'Excelente serviço, rápido e limpo!',
     created_at: '2026-03-12T10:00:00Z',
   },
   {
-    id: 'r2',
-    professional_id: 'p2',
+    id: 'r0000000-0000-4000-8000-000000000002',
+    professional_id: 'd0000000-0000-4000-8000-000000000002',
     reviewer_name: 'Maria Oliveira',
     rating: 4,
     comment: 'Muito bom, recomendo.',
     created_at: '2026-03-10T10:00:00Z',
   },
   {
-    id: 'r3',
-    professional_id: 'p3',
+    id: 'r0000000-0000-4000-8000-000000000003',
+    professional_id: 'd0000000-0000-4000-8000-000000000003',
     reviewer_name: 'Carlos Mendes',
     rating: 5,
     comment: 'Resolveu meu problema em minutos.',
@@ -731,7 +790,7 @@ export const MOCK_REVIEWS: Review[] = [
 
 export const MOCK_ADS: Ad[] = [
   {
-    id: 'ad1',
+    id: 'f0000000-0000-4000-8000-000000000001',
     companyName: 'ConstruMax Materiais',
     description: 'Tudo para sua obra com os melhores preços. Entrega rápida em toda Rondonópolis!',
     imageUrl: 'https://img.usecurling.com/p/800/400?q=construction%20materials&color=orange',
@@ -740,9 +799,10 @@ export const MOCK_ADS: Ad[] = [
     active: true,
     phone: '5566999999999',
     website: 'https://exemplo.com',
+    isGeneral: false,
   },
   {
-    id: 'ad2',
+    id: 'f0000000-0000-4000-8000-000000000002',
     companyName: 'AutoPeças Rondon',
     description: 'Peças originais e paralelas para todas as marcas. Venha conferir nosso estoque.',
     imageUrl: 'https://img.usecurling.com/p/800/400?q=auto%20parts&color=blue',
@@ -751,16 +811,17 @@ export const MOCK_ADS: Ad[] = [
     active: true,
     phone: '5566999999998',
     instagram: 'https://instagram.com',
+    isGeneral: false,
   },
 ]
 
-// To maintain compatibility with older mock data references in isolated components
 export const CATEGORY_OPTIONS = MOCK_CATEGORIES.map((c) => ({
   label: c.name,
   value: c.id,
   group: c.group,
   emoji: c.emoji,
 }))
+
 export const CATEGORY_GROUPS = MOCK_CATEGORIES.reduce(
   (acc, c) => {
     const group = c.group || 'Outros'

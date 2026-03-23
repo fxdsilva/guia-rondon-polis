@@ -22,6 +22,8 @@ import {
   Service,
   Review,
   Ad,
+  PLAN_FREE_ID,
+  PLAN_PREMIUM_ID,
 } from './mockData'
 import { supabase } from '@/lib/supabase/client'
 
@@ -57,7 +59,7 @@ type MainStoreContextType = {
   updateCategory: (id: string, data: Partial<Category>) => Promise<void>
   deleteCategory: (id: string) => Promise<void>
   toggleAdActive: (id: string) => void
-  addAd: (ad: Ad) => Promise<void>
+  addAd: (ad: Omit<Ad, 'id'>) => Promise<void>
   updateAd: (id: string, data: Partial<Ad>) => Promise<void>
   deleteAd: (id: string) => Promise<void>
   generateOtp: (phone: string) => Promise<string | null>
@@ -67,85 +69,140 @@ type MainStoreContextType = {
 const MainStoreContext = createContext<MainStoreContextType | undefined>(undefined)
 
 export function MainStoreProvider({ children }: { children: ReactNode }) {
-  const [plans] = useState<Plan[]>(MOCK_PLANS)
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES)
-  const [neighborhoods] = useState<Neighborhood[]>(MOCK_NEIGHBORHOODS)
-  const [professionals, setProfessionals] = useState<Professional[]>(MOCK_PROFESSIONALS)
-  const [services, setServices] = useState<Service[]>(MOCK_SERVICES)
-  const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS)
-  const [ads, setAds] = useState<Ad[]>(MOCK_ADS)
+  const [plans, setPlans] = useState<Plan[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([])
+  const [professionals, setProfessionals] = useState<Professional[]>([])
+  const [services, setServices] = useState<Service[]>([])
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [ads, setAds] = useState<Ad[]>([])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchSupabaseData = async () => {
       try {
-        const [prosRes, srvRes, revRes, adsRes, catRes] = await Promise.all([
-          supabase.from('professionals' as any).select('*'),
+        const [pRes, cRes, nRes] = await Promise.all([
+          supabase
+            .from('plans' as any)
+            .select('id')
+            .limit(1),
+          supabase
+            .from('categories' as any)
+            .select('id')
+            .limit(1),
+          supabase
+            .from('neighborhoods' as any)
+            .select('id')
+            .limit(1),
+        ])
+
+        const seeds = []
+        if (!pRes.error && pRes.data.length === 0)
+          seeds.push(supabase.from('plans' as any).insert(MOCK_PLANS))
+        if (!cRes.error && cRes.data.length === 0)
+          seeds.push(
+            supabase
+              .from('categories' as any)
+              .insert(
+                MOCK_CATEGORIES.map((c) => ({
+                  id: c.id,
+                  name: c.name,
+                  slug: c.slug,
+                  icon: c.icon,
+                  group: c.group,
+                  emoji: c.emoji,
+                  group_emoji: c.groupEmoji,
+                  suggested_services: c.suggested_services,
+                })),
+              ),
+          )
+        if (!nRes.error && nRes.data.length === 0)
+          seeds.push(
+            supabase
+              .from('neighborhoods' as any)
+              .insert(
+                MOCK_NEIGHBORHOODS.map((n) => ({
+                  id: n.id,
+                  name: n.name,
+                  latitude: n.latitude,
+                  longitude: n.longitude,
+                  group: n.group,
+                })),
+              ),
+          )
+        if (seeds.length > 0) await Promise.all(seeds)
+
+        const proRes = await supabase
+          .from('professionals' as any)
+          .select('id')
+          .limit(1)
+        if (!proRes.error && proRes.data.length === 0) {
+          await supabase.from('professionals' as any).insert(MOCK_PROFESSIONALS)
+          await supabase.from('services' as any).insert(MOCK_SERVICES)
+          await supabase.from('reviews' as any).insert(MOCK_REVIEWS)
+        }
+
+        const adRes = await supabase
+          .from('advertisements' as any)
+          .select('id')
+          .limit(1)
+        if (!adRes.error && adRes.data.length === 0) {
+          await supabase
+            .from('advertisements' as any)
+            .insert(
+              MOCK_ADS.map((a) => ({
+                id: a.id,
+                company_name: a.companyName,
+                description: a.description,
+                image_url: a.imageUrl,
+                link: a.link,
+                target_categories: a.targetCategories,
+                active: a.active,
+                phone: a.phone,
+                website: a.website,
+                facebook: a.facebook,
+                instagram: a.instagram,
+                is_general: a.isGeneral,
+              })),
+            )
+        }
+
+        const [dbP, dbS, dbR, dbA, dbC, dbN, dbPl] = await Promise.all([
+          supabase
+            .from('professionals' as any)
+            .select('*')
+            .order('created_at', { ascending: false }),
           supabase.from('services' as any).select('*'),
           supabase.from('reviews' as any).select('*'),
           supabase.from('advertisements' as any).select('*'),
           supabase.from('categories' as any).select('*'),
+          supabase.from('neighborhoods' as any).select('*'),
+          supabase.from('plans' as any).select('*'),
         ])
 
-        if (!prosRes.error && prosRes.data && prosRes.data.length > 0) {
-          setProfessionals((prev) => {
-            const existingIds = new Set(prev.map((p) => p.id))
-            const newItems = prosRes.data.filter((i: any) => !existingIds.has(i.id))
-            return [...newItems, ...prev]
-          })
-        }
-
-        if (!srvRes.error && srvRes.data && srvRes.data.length > 0) {
-          setServices((prev) => {
-            const existingIds = new Set(prev.map((p) => p.id))
-            const newItems = srvRes.data.filter((i: any) => !existingIds.has(i.id))
-            return [...newItems, ...prev]
-          })
-        }
-
-        if (!revRes.error && revRes.data && revRes.data.length > 0) {
-          setReviews((prev) => {
-            const existingIds = new Set(prev.map((p) => p.id))
-            const newItems = revRes.data.filter((i: any) => !existingIds.has(i.id))
-            return [...newItems, ...prev]
-          })
-        }
-
-        if (!adsRes.error && adsRes.data && adsRes.data.length > 0) {
-          setAds((prev) => {
-            const existingIds = new Set(prev.map((a) => a.id))
-            const newAds = adsRes.data.filter((a: any) => !existingIds.has(a.id))
-            return [...newAds, ...prev]
-          })
-        }
-
-        if (!catRes.error && catRes.data) {
-          if (catRes.data.length === 0) {
-            const seedCats = MOCK_CATEGORIES.map((c) => ({
-              id: c.id,
-              name: c.name,
-              slug: c.slug,
-              icon: c.icon,
-              group: c.group,
-              emoji: c.emoji,
-              group_emoji: c.groupEmoji,
-            }))
-            await supabase.from('categories' as any).insert(seedCats)
-            setCategories(MOCK_CATEGORIES)
-          } else {
-            const mappedCats = catRes.data.map((c: any) => ({
-              id: c.id,
-              name: c.name,
-              slug: c.slug,
-              icon: c.icon,
-              group: c.group,
-              emoji: c.emoji,
-              groupEmoji: c.group_emoji,
-              suggested_services: c.suggested_services || [],
-            }))
-            setCategories(mappedCats)
-          }
-        }
+        if (dbC.data) setCategories(dbC.data.map((c: any) => ({ ...c, groupEmoji: c.group_emoji })))
+        if (dbN.data) setNeighborhoods(dbN.data)
+        if (dbPl.data) setPlans(dbPl.data)
+        if (dbP.data) setProfessionals(dbP.data)
+        if (dbS.data) setServices(dbS.data)
+        if (dbR.data) setReviews(dbR.data)
+        if (dbA.data)
+          setAds(
+            dbA.data.map((a: any) => ({
+              id: a.id,
+              companyName: a.company_name,
+              description: a.description,
+              imageUrl: a.image_url,
+              link: a.link,
+              targetCategories: a.target_categories || [],
+              active: a.active,
+              phone: a.phone,
+              website: a.website,
+              facebook: a.facebook,
+              instagram: a.instagram,
+              isGeneral: a.is_general,
+            })),
+          )
       } catch (err) {
         console.warn('Error fetching from Supabase, relying on local mock state', err)
       }
@@ -157,10 +214,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     return professionals.map((pro) => {
       const proServices = services.filter((s) => s.professional_id === pro.id)
       const proReviews = reviews.filter((r) => r.professional_id === pro.id)
-      const category = categories.find((c) => c.id === pro.category_id)
-      const neighborhood = neighborhoods.find((n) => n.id === pro.neighborhood_id)
-      const plan = plans.find((p) => p.id === pro.plan_id)
-
       const rating =
         proReviews.length > 0
           ? proReviews.reduce((sum, r) => sum + r.rating, 0) / proReviews.length
@@ -168,9 +221,9 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
 
       return {
         ...pro,
-        category,
-        neighborhood,
-        plan,
+        category: categories.find((c) => c.id === pro.category_id),
+        neighborhood: neighborhoods.find((n) => n.id === pro.neighborhood_id),
+        plan: plans.find((p) => p.id === pro.plan_id),
         services: proServices,
         reviews: proReviews,
         rating,
@@ -182,7 +235,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
   const togglePremium = async (id: string) => {
     const pro = professionals.find((p) => p.id === id)
     if (!pro) return
-    const newPlanId = pro.plan_id === 'plan-premium' ? 'plan-free' : 'plan-premium'
+    const newPlanId = pro.plan_id === PLAN_PREMIUM_ID ? PLAN_FREE_ID : PLAN_PREMIUM_ID
     setProfessionals((prev) => prev.map((p) => (p.id === id ? { ...p, plan_id: newPlanId } : p)))
     try {
       await supabase
@@ -197,12 +250,13 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
   const toggleVerified = async (id: string) => {
     const pro = professionals.find((p) => p.id === id)
     if (!pro) return
-    const newStatus = !pro.verified
-    setProfessionals((prev) => prev.map((p) => (p.id === id ? { ...p, verified: newStatus } : p)))
+    setProfessionals((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, verified: !pro.verified } : p)),
+    )
     try {
       await supabase
         .from('professionals' as any)
-        .update({ verified: newStatus })
+        .update({ verified: !pro.verified })
         .eq('id', id)
     } catch (e) {
       console.error(e)
@@ -213,27 +267,29 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     pro: Omit<Professional, 'id' | 'created_at'>,
     servicesList: string[],
   ) => {
-    const newId = `new-${Date.now()}`
-    const newPro: Professional = { ...pro, id: newId } as Professional
-
-    setProfessionals((prev) => [newPro, ...prev])
-
-    const newServices = servicesList.map((name, i) => ({
-      id: `srv-${Date.now()}-${i}`,
-      professional_id: newId,
-      name,
-    }))
-    setServices((prev) => [...newServices, ...prev])
-
     try {
-      await supabase.from('professionals' as any).insert([newPro])
-      if (newServices.length > 0) {
-        await supabase.from('services' as any).insert(newServices)
+      const { data: newPro, error } = await supabase
+        .from('professionals' as any)
+        .insert([pro])
+        .select()
+        .single()
+      if (error) throw error
+
+      setProfessionals((prev) => [newPro as Professional, ...prev])
+
+      if (servicesList.length > 0) {
+        const newServices = servicesList.map((name) => ({ professional_id: newPro.id, name }))
+        const { data: srvData } = await supabase
+          .from('services' as any)
+          .insert(newServices)
+          .select()
+        if (srvData) setServices((prev) => [...(srvData as Service[]), ...prev])
       }
+      return newPro.id
     } catch (e) {
       console.error(e)
+      return undefined
     }
-    return newId
   }
 
   const updateProfessional = async (id: string, data: Partial<Professional>) => {
@@ -249,10 +305,14 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
   }
 
   const addCategory = async (cat: Omit<Category, 'id' | 'created_at'>) => {
-    const newId = `cat-${Date.now()}`
-    setCategories((prev) => [...prev, { ...cat, id: newId } as Category])
     try {
-      await supabase.from('categories' as any).insert([{ ...cat, id: newId }])
+      const { data, error } = await supabase
+        .from('categories' as any)
+        .insert([{ ...cat, group_emoji: cat.groupEmoji }])
+        .select()
+        .single()
+      if (!error && data)
+        setCategories((prev) => [...prev, { ...data, groupEmoji: data.group_emoji } as Category])
     } catch (e) {
       console.error(e)
     }
@@ -282,14 +342,31 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const toggleAdActive = (id: string) => {
+  const toggleAdActive = (id: string) =>
     setAds((prev) => prev.map((a) => (a.id === id ? { ...a, active: !a.active } : a)))
-  }
 
-  const addAd = async (ad: Ad) => {
-    setAds((prev) => [ad, ...prev])
+  const addAd = async (ad: Omit<Ad, 'id'>) => {
     try {
-      await supabase.from('advertisements' as any).insert([ad])
+      const { data, error } = await supabase
+        .from('advertisements' as any)
+        .insert([
+          {
+            company_name: ad.companyName,
+            description: ad.description,
+            image_url: ad.imageUrl,
+            link: ad.link,
+            target_categories: ad.targetCategories,
+            active: ad.active,
+            phone: ad.phone,
+            website: ad.website,
+            facebook: ad.facebook,
+            instagram: ad.instagram,
+            is_general: ad.isGeneral,
+          },
+        ])
+        .select()
+        .single()
+      if (!error && data) setAds((prev) => [{ ...ad, id: data.id } as Ad, ...prev])
     } catch (e) {
       console.error(e)
     }
@@ -300,7 +377,12 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     try {
       await supabase
         .from('advertisements' as any)
-        .update(data)
+        .update({
+          company_name: data.companyName,
+          image_url: data.imageUrl,
+          target_categories: data.targetCategories,
+          ...data,
+        })
         .eq('id', id)
     } catch (e) {
       console.error(e)
@@ -320,11 +402,17 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
   }
 
   const generateOtp = async (phone: string) => {
-    const pro = professionals.find((p) => p.phone === phone)
-    if (!pro) return null
-    const code = Math.floor(100000 + Math.random() * 900000).toString()
-    const expiresAt = new Date(Date.now() + 10 * 60000).toISOString()
     try {
+      const { data: pro, error: proError } = await supabase
+        .from('professionals' as any)
+        .select('id')
+        .eq('phone', phone)
+        .single()
+      if (proError || !pro) return null
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString()
+      const expiresAt = new Date(Date.now() + 10 * 60000).toISOString()
+
       await supabase
         .from('otps' as any)
         .delete()
@@ -346,9 +434,12 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         .eq('code', code)
         .gte('expires_at', new Date().toISOString())
         .single()
-
       if (data && !error) {
-        const pro = professionals.find((p) => p.phone === phone)
+        const { data: pro } = await supabase
+          .from('professionals' as any)
+          .select('id')
+          .eq('phone', phone)
+          .single()
         await supabase
           .from('otps' as any)
           .delete()
@@ -396,8 +487,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
 
 export default function useMainStore() {
   const context = useContext(MainStoreContext)
-  if (!context) {
-    throw new Error('useMainStore must be used within a MainStoreProvider')
-  }
+  if (!context) throw new Error('useMainStore must be used within a MainStoreProvider')
   return context
 }

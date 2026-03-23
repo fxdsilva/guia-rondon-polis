@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
 import useMainStore from '@/stores/main'
 import { useToast } from '@/hooks/use-toast'
+import { PLAN_PREMIUM_ID, PLAN_PENDING_ID } from '@/stores/mockData'
 
 const EditProfilePage = () => {
   const {
@@ -60,15 +61,6 @@ const EditProfilePage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     const cleanPhone = loginPhone.replace(/\D/g, '')
-    const pro = populatedProfessionals.find((p) => p.phone === cleanPhone)
-
-    if (!pro) {
-      return toast({
-        title: 'Perfil não encontrado',
-        description: 'Verifique se o número foi digitado corretamente.',
-        variant: 'destructive',
-      })
-    }
 
     const code = await generateOtp(cleanPhone)
     if (code) {
@@ -80,8 +72,8 @@ const EditProfilePage = () => {
       })
     } else {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível gerar o código. Tente novamente mais tarde.',
+        title: 'Perfil não encontrado',
+        description: 'Verifique se o número foi digitado corretamente.',
         variant: 'destructive',
       })
     }
@@ -133,7 +125,7 @@ const EditProfilePage = () => {
 
   const handleRequestPremium = async () => {
     if (!currentUserId) return
-    await updateProfessional(currentUserId, { plan_id: 'plan-pending' })
+    await updateProfessional(currentUserId, { plan_id: PLAN_PENDING_ID })
     toast({
       title: 'Solicitação Enviada!',
       description: 'Nossa equipe validará seu pagamento e ativará o modo Premium em breve.',
@@ -155,7 +147,7 @@ const EditProfilePage = () => {
             <h1 className="text-2xl font-bold text-secondary mb-2">Atualizar Dados</h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {step === 'phone'
-                ? 'Digite seu número de WhatsApp cadastrado para acessar seu perfil profissional.'
+                ? 'Digite seu número de WhatsApp cadastrado para acessar seu perfil.'
                 : 'Digite o código enviado para seu WhatsApp'}
             </p>
           </div>
@@ -221,8 +213,8 @@ const EditProfilePage = () => {
   if (!formData) return null
 
   const categoryName = categories.find((c) => c.id === formData.categoryId)?.name || 'sua categoria'
-  const isPremiumRequested = formData.planId === 'plan-pending'
-  const isPremium = formData.planId === 'plan-premium'
+  const isPremiumRequested = formData.planId === PLAN_PENDING_ID
+  const isPremium = formData.planId === PLAN_PREMIUM_ID
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl animate-fade-in">

@@ -5,6 +5,7 @@ import { ProfessionalCard } from '@/components/ProfessionalCard'
 import { Building2, SearchX, Globe, Facebook, Instagram, Phone } from 'lucide-react'
 import { MapSection } from '@/components/home/MapSection'
 import { Button } from '@/components/ui/button'
+import { PLAN_PREMIUM_ID, NB_ALL_ID } from '@/stores/mockData'
 
 export default function CategoryPage() {
   const { slug } = useParams()
@@ -35,7 +36,7 @@ export default function CategoryPage() {
         : true
 
       const matchesNeighborhood =
-        selectedNeighborhoodIds.length > 0 && !selectedNeighborhoodIds.includes('n6')
+        selectedNeighborhoodIds.length > 0 && !selectedNeighborhoodIds.includes(NB_ALL_ID)
           ? selectedNeighborhoodIds.includes(pro.neighborhood_id)
           : true
 
@@ -48,7 +49,7 @@ export default function CategoryPage() {
       const rank = (p: PopulatedProfessional) => {
         if (p.premium_highlight === 'top1') return 4
         if (p.premium_highlight === 'recommended') return 3
-        if (p.plan?.id === 'plan-premium') return 2
+        if (p.plan?.id === PLAN_PREMIUM_ID) return 2
         return 1
       }
       const rankDiff = rank(b) - rank(a)

@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ContextualAds } from '@/components/ContextualAds'
 import useMainStore from '@/stores/main'
+import { PLAN_PREMIUM_ID } from '@/stores/mockData'
 import NotFound from './NotFound'
 
 const ProfessionalPage = () => {
@@ -28,7 +29,7 @@ const ProfessionalPage = () => {
 
   if (!pro) return <NotFound />
 
-  const isPremium = pro.plan?.id === 'plan-premium'
+  const isPremium = pro.plan?.id === PLAN_PREMIUM_ID
 
   const handleWhatsApp = () => {
     const msg = encodeURIComponent(

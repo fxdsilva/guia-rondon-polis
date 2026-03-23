@@ -20,6 +20,7 @@ import useMainStore from '@/stores/main'
 import { ImageCropper } from '@/components/ImageCropper'
 import { getAISuggestions } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
+import { PLAN_FREE_ID } from '@/stores/mockData'
 
 const RegisterPage = () => {
   const [step, setStep] = useState(1)
@@ -122,7 +123,7 @@ const RegisterPage = () => {
         address: formData.hasAddress ? formData.address : '',
         category_id: formData.categoryId,
         neighborhood_id: formData.neighborhoodId,
-        plan_id: 'plan-free',
+        plan_id: PLAN_FREE_ID,
         verified: false,
         image: formData.image || 'https://img.usecurling.com/ppl/medium',
         gallery: formData.gallery,
@@ -135,9 +136,15 @@ const RegisterPage = () => {
       setCurrentUserId(newId)
       toast({
         title: 'Cadastro Concluído!',
-        description: 'Seu perfil profissional foi criado com sucesso.',
+        description: 'Seu perfil profissional foi salvo no banco de dados com sucesso.',
       })
       navigate(`/profissional/${newId}`)
+    } else {
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao salvar seu perfil. Tente novamente.',
+        variant: 'destructive',
+      })
     }
   }
 
