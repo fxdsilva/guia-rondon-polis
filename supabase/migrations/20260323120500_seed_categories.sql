@@ -1,3 +1,33 @@
+CREATE TABLE IF NOT EXISTS public.categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    emoji TEXT,
+    "group" TEXT,
+    group_emoji TEXT,
+    icon TEXT,
+    suggested_services TEXT[],
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Categories are readable by everyone" ON public.categories;
+CREATE POLICY "Categories are readable by everyone" ON public.categories
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Categories are insertable by everyone" ON public.categories;
+CREATE POLICY "Categories are insertable by everyone" ON public.categories
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Categories are updatable by everyone" ON public.categories;
+CREATE POLICY "Categories are updatable by everyone" ON public.categories
+  FOR UPDATE USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Categories are deletable by everyone" ON public.categories;
+CREATE POLICY "Categories are deletable by everyone" ON public.categories
+  FOR DELETE USING (true);
+
 -- Seed categories for Guia Rondonópolis Directory
 INSERT INTO public.categories (id, name, slug, emoji, "group", group_emoji, icon) VALUES
 ('c0000000-0000-4000-8000-000000000001', 'Pedreiro', 'pedreiro', '🧱', 'Casa e Construção', '🏠', 'hammer'),
