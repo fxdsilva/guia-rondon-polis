@@ -15,7 +15,7 @@ export function ProfessionalCard({ pro }: Props) {
     const msg = encodeURIComponent(
       'Olá, vi seu perfil no Guia Rondonópolis e gostaria de um orçamento.',
     )
-    window.open(`https://wa.me/${pro.phone}?text=${msg}`, '_blank')
+    window.open(`https://wa.me/${pro.phone}?text=${msg}`, '_blank', 'noopener,noreferrer')
   }
 
   return (

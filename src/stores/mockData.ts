@@ -1,12 +1,4 @@
-export type Category =
-  | 'Eletricista'
-  | 'Encanador'
-  | 'Diarista'
-  | 'Mecânico'
-  | 'Pedreiro'
-  | 'Ar-condicionado'
-  | 'Informática'
-  | 'Pintor'
+export type Category = string
 
 export type Review = {
   id: string
@@ -34,7 +26,62 @@ export type Professional = {
   workingHours: string
 }
 
-export const MOCK_CATEGORIES: Category[] = [
+export const CATEGORY_GROUPS = {
+  'Casa e Construção': [
+    'Pedreiro',
+    'Pintor',
+    'Marceneiro',
+    'Vidraceiro',
+    'Gesseiro',
+    'Azulejista',
+    'Reformas em geral',
+  ],
+  'Manutenção e Técnicos': [
+    'Eletricista',
+    'Encanador',
+    'Ar-condicionado',
+    'Instalação elétrica',
+    'Aquecedor',
+    'Técnico em eletrodomésticos',
+  ],
+  'Serviços Domésticos': ['Diarista', 'Faxineira', 'Babá', 'Cuidador de idosos', 'Pet sitter'],
+  Automotivo: [
+    'Mecânico',
+    'Guincho',
+    'Bateria automotiva',
+    'Lava jato',
+    'Borracharia',
+    'Funilaria',
+  ],
+  Tecnologia: [
+    'Informática',
+    'Conserto de celular',
+    'Instalação de internet',
+    'Câmeras de segurança',
+    'Redes e Wi-Fi',
+  ],
+  'Serviços Externos': [
+    'Jardinagem',
+    'Paisagismo',
+    'Roçagem de lote',
+    'Limpeza de terreno',
+    'Caçamba (entulho)',
+  ],
+  Eventos: ['DJ', 'Fotógrafo', 'Filmagem', 'Decoração', 'Buffet'],
+  'Profissionais Especializados': [
+    'Advogado',
+    'Contador',
+    'Personal trainer',
+    'Cabeleireiro',
+    'Manicure',
+  ],
+  Pets: ['Banho e tosa', 'Adestrador', 'Veterinário'],
+  'Transporte e Frete': ['Frete', 'Mudança', 'Entregador'],
+}
+
+export const MOCK_CATEGORIES = Object.values(CATEGORY_GROUPS).flat()
+
+export const POPULAR_CATEGORIES = [
   'Eletricista',
   'Encanador',
   'Diarista',
@@ -45,15 +92,71 @@ export const MOCK_CATEGORIES: Category[] = [
   'Pintor',
 ]
 
-export const MOCK_NEIGHBORHOODS = [
-  'Centro',
-  'Vila Aurora',
-  'Sagrada Família',
-  'Jardim Atlântico',
-  'Parque Universitário',
-  'Vila Operária',
-  'Todos os bairros',
-]
+export const NEIGHBORHOOD_GROUPS = {
+  'Centro e região': [
+    'Centro',
+    'Vila Goulart',
+    'Vila Aurora',
+    'Vila Aurora I',
+    'Vila Aurora II',
+    'Vila Aurora III',
+    'Jardim Mato Grosso',
+  ],
+  'Região Sagrada Família / Universitário': [
+    'Parque Sagrada Família',
+    'Cidade Universitária',
+    'Parque Residencial Universitário',
+  ],
+  'Região Atlântico / Liberdade': [
+    'Jardim Atlântico',
+    'Jardim Liberdade',
+    'Jardim Iguaçu',
+    'Jardim Iguaçu I',
+    'Jardim Iguaçu II',
+  ],
+  'Região Salmen / Pedra 90': ['Cidade Salmen', 'Pedra Noventa', 'Jardim Primavera'],
+  'Região Grande Conquista / Cidade Alta': ['Cidade Alta', 'Parque São Jorge', 'Jardim Europa'],
+  'Região Vila Operária': ['Vila Operária', 'Vila Olinda', 'Vila Mariana'],
+  Outros: [
+    'Jardim Belo Horizonte',
+    'Jardim Tropical',
+    'Jardim Guanabara',
+    'Jardim Brasília',
+    'Jardim Santa Clara',
+    'Jardim Morumbi',
+    'Jardim Pindorama',
+    'Jardim Copacabana',
+    'Jardim Ipanema',
+    'Jardim das Flores',
+    'Jardim Eldorado',
+    'Jardim Gramado',
+    'Jardim Novo Horizonte',
+    'Jardim América',
+    'Jardim Beira Rio',
+    'Jardim São Francisco',
+    'Jardim Santa Marta',
+    'Jardim Dom Bosco',
+  ],
+  Conjuntos: [
+    'Cohab Rio Vermelho',
+    'Conjunto São José',
+    'Coophalis',
+    'Cidade de Deus',
+    'Residencial Paraíso',
+    'Residencial Buriti',
+    'Residencial Bela Vista',
+  ],
+  Rurais: [
+    'Chácaras Beira Rio',
+    'Chácaras Paraíso',
+    'Chácaras Nossa Senhora da Guia',
+    'Chácara Alegria',
+    'Chácara Beija-Flor',
+  ],
+  Industriais: ['Distrito Industrial', 'Parque Industrial Vetorasso'],
+}
+
+export const MOCK_NEIGHBORHOODS = Object.values(NEIGHBORHOOD_GROUPS).flat()
 
 const MOCK_REVIEWS: Review[] = [
   {
@@ -113,7 +216,7 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     category: 'Diarista',
     rating: 5.0,
     reviewsCount: 128,
-    neighborhoods: ['Todos os bairros'],
+    neighborhoods: ['Centro', 'Parque Sagrada Família'],
     premium: true,
     verified: true,
     phone: '5566999999998',
@@ -134,7 +237,7 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     category: 'Encanador',
     rating: 4.5,
     reviewsCount: 15,
-    neighborhoods: ['Sagrada Família', 'Jardim Atlântico'],
+    neighborhoods: ['Parque Sagrada Família', 'Jardim Atlântico'],
     premium: false,
     verified: false,
     phone: '5566999999997',

@@ -6,13 +6,15 @@ import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
 import { ProfessionalCard } from '@/components/ProfessionalCard'
 import useMainStore from '@/stores/main'
-import { MOCK_NEIGHBORHOODS } from '@/stores/mockData'
+import { NEIGHBORHOOD_GROUPS } from '@/stores/mockData'
 
 const CategoryPage = () => {
   const { slug } = useParams()
@@ -61,7 +63,6 @@ const CategoryPage = () => {
     if (sortParam === 'avaliados') {
       result = [...result].sort((a, b) => b.rating - a.rating)
     } else {
-      // Recomendados: Premium first, then by rating
       result = [...result].sort((a, b) => {
         if (a.premium && !b.premium) return -1
         if (!a.premium && b.premium) return 1
@@ -90,7 +91,6 @@ const CategoryPage = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar Filters */}
         <aside className="w-full lg:w-64 shrink-0 space-y-6">
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">Filtros</h3>
@@ -120,10 +120,16 @@ const CategoryPage = () => {
                   <SelectValue placeholder="Selecione um bairro" />
                 </SelectTrigger>
                 <SelectContent>
-                  {MOCK_NEIGHBORHOODS.map((n) => (
-                    <SelectItem key={n} value={n}>
-                      {n}
-                    </SelectItem>
+                  <SelectItem value="Todos os bairros">Todos os bairros</SelectItem>
+                  {Object.entries(NEIGHBORHOOD_GROUPS).map(([group, hoods]) => (
+                    <SelectGroup key={group}>
+                      <SelectLabel>{group}</SelectLabel>
+                      {hoods.map((n) => (
+                        <SelectItem key={n} value={n}>
+                          {n}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   ))}
                 </SelectContent>
               </Select>
@@ -144,7 +150,6 @@ const CategoryPage = () => {
           </div>
         </aside>
 
-        {/* List */}
         <div className="flex-1">
           {filteredPros.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

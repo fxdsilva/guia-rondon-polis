@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MOCK_CATEGORIES } from '@/stores/mockData'
+import { POPULAR_CATEGORIES } from '@/stores/mockData'
 import { CategoryIcon } from '@/components/CategoryIcon'
 
 export function CategoriesGrid() {
@@ -14,7 +14,7 @@ export function CategoriesGrid() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {MOCK_CATEGORIES.map((cat, i) => (
+          {POPULAR_CATEGORIES.map((cat, i) => (
             <Link
               key={cat}
               to={`/categoria/${getSlug(cat)}`}

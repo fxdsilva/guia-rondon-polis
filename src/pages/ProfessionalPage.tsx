@@ -18,12 +18,11 @@ const ProfessionalPage = () => {
     const msg = encodeURIComponent(
       `Olá ${pro.name}, vi seu perfil no Guia Rondonópolis e gostaria de um orçamento.`,
     )
-    window.open(`https://wa.me/${pro.phone}?text=${msg}`, '_blank')
+    window.open(`https://wa.me/${pro.phone}?text=${msg}`, '_blank', 'noopener,noreferrer')
   }
 
   return (
     <div className="bg-muted/30 min-h-screen pb-32 md:pb-12">
-      {/* Profile Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between">
@@ -185,7 +184,6 @@ const ProfessionalPage = () => {
         </div>
       </div>
 
-      {/* Mobile Sticky CTA */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-40">
         <Button
           className="w-full gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white h-12 text-lg rounded-xl"

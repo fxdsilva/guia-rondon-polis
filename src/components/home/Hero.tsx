@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MOCK_NEIGHBORHOODS } from '@/stores/mockData'
+import { NEIGHBORHOOD_GROUPS } from '@/stores/mockData'
 
 export function Hero() {
   const [query, setQuery] = useState('')
@@ -65,10 +67,16 @@ export function Hero() {
                 <SelectValue placeholder="Bairro" />
               </SelectTrigger>
               <SelectContent>
-                {MOCK_NEIGHBORHOODS.map((n) => (
-                  <SelectItem key={n} value={n}>
-                    {n}
-                  </SelectItem>
+                <SelectItem value="Todos os bairros">Todos os bairros</SelectItem>
+                {Object.entries(NEIGHBORHOOD_GROUPS).map(([group, hoods]) => (
+                  <SelectGroup key={group}>
+                    <SelectLabel>{group}</SelectLabel>
+                    {hoods.map((n) => (
+                      <SelectItem key={n} value={n}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 ))}
               </SelectContent>
             </Select>
