@@ -83,7 +83,17 @@ export default function CategoryPage() {
   return (
     <div className="min-h-screen bg-background pt-24 pb-20">
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold text-secondary mb-8 capitalize">
+        <h1 className="text-3xl font-bold text-secondary mb-8 flex items-center gap-3 capitalize">
+          {(() => {
+            if (normalizedSlug === 'todas') return null
+            const cat = categories.find((c) => c.slug === slug)
+            if (cat) return <span>{cat.emoji}</span>
+            const groupCat = categories.find(
+              (c) => c.group?.toLowerCase().replace(/\s+/g, '-') === slug,
+            )
+            if (groupCat) return <span>{groupCat.groupEmoji}</span>
+            return null
+          })()}
           {normalizedSlug === 'todas' ? 'Todos os Profissionais' : normalizedSlug}
         </h1>
 

@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
+  SelectGroup,
+  SelectLabel,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -257,10 +259,27 @@ const EditProfilePage = () => {
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
+                  {Object.entries(
+                    categories.reduce(
+                      (acc, c) => {
+                        const group = c.group || 'Outros'
+                        if (!acc[group]) acc[group] = []
+                        acc[group].push(c)
+                        return acc
+                      },
+                      {} as Record<string, typeof categories>,
+                    ),
+                  ).map(([groupName, cats]) => (
+                    <SelectGroup key={groupName}>
+                      <SelectLabel className="font-bold text-primary bg-muted/30">
+                        {cats[0].groupEmoji} {groupName}
+                      </SelectLabel>
+                      {cats.map((c) => (
+                        <SelectItem key={c.id} value={c.id} className="ml-2 cursor-pointer">
+                          {c.emoji} {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   ))}
                 </SelectContent>
               </Select>

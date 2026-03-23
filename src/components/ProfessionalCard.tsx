@@ -65,7 +65,7 @@ export function ProfessionalCard({ pro }: Props) {
                 </div>
 
                 <p className="text-sm text-muted-foreground truncate" title={pro.category?.name}>
-                  {pro.category?.name || 'Profissional'}
+                  {pro.category?.emoji} {pro.category?.name || 'Profissional'}
                 </p>
               </div>
 
