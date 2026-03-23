@@ -53,6 +53,9 @@ type MainStoreContextType = {
     servicesList: string[],
   ) => Promise<string | undefined>
   updateProfessional: (id: string, data: Partial<Professional>) => Promise<void>
+  addCategory: (cat: Omit<Category, 'id' | 'created_at'>) => Promise<void>
+  updateCategory: (id: string, data: Partial<Category>) => Promise<void>
+  deleteCategory: (id: string) => Promise<void>
   toggleAdActive: (id: string) => void
   addAd: (ad: Ad) => Promise<void>
   updateAd: (id: string, data: Partial<Ad>) => Promise<void>
@@ -63,7 +66,7 @@ const MainStoreContext = createContext<MainStoreContextType | undefined>(undefin
 
 export function MainStoreProvider({ children }: { children: ReactNode }) {
   const [plans] = useState<Plan[]>(MOCK_PLANS)
-  const [categories] = useState<Category[]>(MOCK_CATEGORIES)
+  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES)
   const [neighborhoods] = useState<Neighborhood[]>(MOCK_NEIGHBORHOODS)
   const [professionals, setProfessionals] = useState<Professional[]>(MOCK_PROFESSIONALS)
   const [services, setServices] = useState<Service[]>(MOCK_SERVICES)
@@ -74,11 +77,12 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchSupabaseData = async () => {
       try {
-        const [prosRes, srvRes, revRes, adsRes] = await Promise.all([
+        const [prosRes, srvRes, revRes, adsRes, catRes] = await Promise.all([
           supabase.from('professionals' as any).select('*'),
           supabase.from('services' as any).select('*'),
           supabase.from('reviews' as any).select('*'),
           supabase.from('advertisements' as any).select('*'),
+          supabase.from('categories' as any).select('*'),
         ])
 
         if (!prosRes.error && prosRes.data && prosRes.data.length > 0) {
@@ -110,6 +114,14 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
             const existingIds = new Set(prev.map((a) => a.id))
             const newAds = adsRes.data.filter((a: any) => !existingIds.has(a.id))
             return [...newAds, ...prev]
+          })
+        }
+
+        if (!catRes.error && catRes.data && catRes.data.length > 0) {
+          setCategories((prev) => {
+            const existingIds = new Set(prev.map((c) => c.id))
+            const newItems = catRes.data.filter((i: any) => !existingIds.has(i.id))
+            return [...newItems, ...prev]
           })
         }
       } catch (err) {
@@ -214,6 +226,40 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const addCategory = async (cat: Omit<Category, 'id' | 'created_at'>) => {
+    const newId = `cat-${Date.now()}`
+    setCategories((prev) => [...prev, { ...cat, id: newId } as Category])
+    try {
+      await supabase.from('categories' as any).insert([{ ...cat, id: newId }])
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const updateCategory = async (id: string, data: Partial<Category>) => {
+    setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, ...data } : c)))
+    try {
+      await supabase
+        .from('categories' as any)
+        .update(data)
+        .eq('id', id)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const deleteCategory = async (id: string) => {
+    setCategories((prev) => prev.filter((c) => c.id !== id))
+    try {
+      await supabase
+        .from('categories' as any)
+        .delete()
+        .eq('id', id)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   const toggleAdActive = (id: string) => {
     setAds((prev) => prev.map((a) => (a.id === id ? { ...a, active: !a.active } : a)))
   }
@@ -269,6 +315,9 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         toggleVerified,
         addProfessional,
         updateProfessional,
+        addCategory,
+        updateCategory,
+        deleteCategory,
         toggleAdActive,
         addAd,
         updateAd,

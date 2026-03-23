@@ -1,6 +1,16 @@
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Edit3, Star, MapPin, BadgeCheck, MessageCircle, Clock, CheckCircle2 } from 'lucide-react'
+import {
+  Edit3,
+  Star,
+  MapPin,
+  BadgeCheck,
+  MessageCircle,
+  Clock,
+  CheckCircle2,
+  Trophy,
+  ThumbsUp,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -60,7 +70,17 @@ const ProfessionalPage = () => {
               <div className="space-y-3 mt-2">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <h1 className="text-3xl font-bold text-secondary">{pro.name}</h1>
-                  {isPremium && (
+                  {pro.premium_highlight === 'top1' && (
+                    <Badge className="w-fit self-center sm:self-auto bg-[#FFD700] hover:bg-[#F2C800] text-amber-950 shadow-sm text-sm py-1 border-transparent px-3">
+                      <Trophy className="w-4 h-4 mr-1.5" /> Top 1 {pro.category?.name}
+                    </Badge>
+                  )}
+                  {pro.premium_highlight === 'recommended' && (
+                    <Badge className="w-fit self-center sm:self-auto bg-[#3b82f6] hover:bg-[#2563eb] text-white shadow-sm text-sm py-1 border-transparent px-3">
+                      <ThumbsUp className="w-4 h-4 mr-1.5" /> Mais recomendado
+                    </Badge>
+                  )}
+                  {!pro.premium_highlight && isPremium && (
                     <Badge className="w-fit self-center sm:self-auto bg-accent text-accent-foreground hover:bg-accent/90">
                       Premium
                     </Badge>

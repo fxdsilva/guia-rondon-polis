@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Star, MapPin, BadgeCheck, MessageCircle } from 'lucide-react'
+import { Star, MapPin, BadgeCheck, MessageCircle, Trophy, ThumbsUp } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -39,23 +39,35 @@ export function ProfessionalCard({ pro }: Props) {
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="font-semibold text-lg truncate text-secondary group-hover:text-primary transition-colors">
-                  {pro.name}
-                </h3>
-                {isPremium && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 shrink-0"
-                  >
-                    Premium
-                  </Badge>
-                )}
-              </div>
+              <div className="flex flex-col gap-1.5 mb-1">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-semibold text-lg truncate text-secondary group-hover:text-primary transition-colors">
+                    {pro.name}
+                  </h3>
+                  {pro.premium_highlight === 'top1' && (
+                    <Badge className="bg-[#FFD700] hover:bg-[#F2C800] text-amber-950 border-transparent shrink-0 shadow-sm gap-1 px-2">
+                      <Trophy className="w-3 h-3" /> Top 1 {pro.category?.name}
+                    </Badge>
+                  )}
+                  {pro.premium_highlight === 'recommended' && (
+                    <Badge className="bg-[#3b82f6] hover:bg-[#2563eb] text-white border-transparent shrink-0 shadow-sm gap-1 px-2">
+                      <ThumbsUp className="w-3 h-3" /> Mais recomendado
+                    </Badge>
+                  )}
+                  {!pro.premium_highlight && isPremium && (
+                    <Badge
+                      variant="secondary"
+                      className="bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 shrink-0"
+                    >
+                      Premium
+                    </Badge>
+                  )}
+                </div>
 
-              <p className="text-sm text-muted-foreground mb-2 truncate" title={pro.category?.name}>
-                {pro.category?.name || 'Profissional'}
-              </p>
+                <p className="text-sm text-muted-foreground truncate" title={pro.category?.name}>
+                  {pro.category?.name || 'Profissional'}
+                </p>
+              </div>
 
               <div className="flex items-center gap-1.5 text-sm font-medium">
                 <Star className="w-4 h-4 fill-accent text-accent" />

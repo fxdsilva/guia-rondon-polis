@@ -1,6 +1,6 @@
 import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { useMemo } from 'react'
-import useMainStore from '@/stores/main'
+import useMainStore, { PopulatedProfessional } from '@/stores/main'
 import { ProfessionalCard } from '@/components/ProfessionalCard'
 import { Building2, SearchX, Globe, Facebook, Instagram, Phone } from 'lucide-react'
 import { MapSection } from '@/components/home/MapSection'
@@ -43,6 +43,20 @@ export default function CategoryPage() {
     })
   }, [populatedProfessionals, normalizedSlug, query, slug, selectedNeighborhoodIds])
 
+  const sortedPros = useMemo(() => {
+    return [...filteredPros].sort((a, b) => {
+      const rank = (p: PopulatedProfessional) => {
+        if (p.premium_highlight === 'top1') return 4
+        if (p.premium_highlight === 'recommended') return 3
+        if (p.plan?.id === 'plan-premium') return 2
+        return 1
+      }
+      const rankDiff = rank(b) - rank(a)
+      if (rankDiff !== 0) return rankDiff
+      return b.rating - a.rating
+    })
+  }, [filteredPros])
+
   const activeAds = ads.filter((a) => a.active)
 
   const expandedCategories = useMemo(() => {
@@ -73,7 +87,7 @@ export default function CategoryPage() {
           {normalizedSlug === 'todas' ? 'Todos os Profissionais' : normalizedSlug}
         </h1>
 
-        {filteredPros.length === 0 ? (
+        {sortedPros.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-3xl border shadow-sm">
             <SearchX className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h2 className="text-2xl font-semibold mb-2">Nenhum profissional encontrado</h2>
@@ -81,7 +95,7 @@ export default function CategoryPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredPros.map((pro) => (
+            {sortedPros.map((pro) => (
               <ProfessionalCard key={pro.id} pro={pro} />
             ))}
           </div>

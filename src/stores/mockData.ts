@@ -11,6 +11,7 @@ export type Category = {
   slug: string
   icon: string
   group?: string
+  suggested_services?: string[]
 }
 
 export type Neighborhood = {
@@ -52,6 +53,8 @@ export type Professional = {
   image: string
   gallery: string[]
   working_hours: string
+  premium_highlight?: 'top1' | 'recommended' | null
+  subscription_status?: 'active' | 'expired' | null
 }
 
 export type Ad = {
@@ -91,6 +94,7 @@ export const MOCK_CATEGORIES: Category[] = [
     slug: 'eletricista',
     icon: 'zap',
     group: 'Manutenção e Técnicos',
+    suggested_services: ['Instalação de tomadas', 'Troca de fiação', 'Quadro de luz'],
   },
   {
     id: 'c2',
@@ -98,26 +102,71 @@ export const MOCK_CATEGORIES: Category[] = [
     slug: 'encanador',
     icon: 'wrench',
     group: 'Manutenção e Técnicos',
+    suggested_services: ['Caça-vazamentos', 'Desentupimento', 'Instalação de pias'],
   },
-  { id: 'c3', name: 'Diarista', slug: 'diarista', icon: 'sparkles', group: 'Serviços Domésticos' },
-  { id: 'c4', name: 'Mecânico', slug: 'mecanico', icon: 'car', group: 'Automotivo' },
-  { id: 'c5', name: 'Pedreiro', slug: 'pedreiro', icon: 'hammer', group: 'Casa e Construção' },
+  {
+    id: 'c3',
+    name: 'Diarista',
+    slug: 'diarista',
+    icon: 'sparkles',
+    group: 'Serviços Domésticos',
+    suggested_services: ['Faxina geral', 'Limpeza pós-obra', 'Passadoria'],
+  },
+  {
+    id: 'c4',
+    name: 'Mecânico',
+    slug: 'mecanico',
+    icon: 'car',
+    group: 'Automotivo',
+    suggested_services: ['Revisão geral', 'Troca de óleo', 'Suspensão'],
+  },
+  {
+    id: 'c5',
+    name: 'Pedreiro',
+    slug: 'pedreiro',
+    icon: 'hammer',
+    group: 'Casa e Construção',
+    suggested_services: ['Alvenaria', 'Reboco', 'Contra-piso'],
+  },
   {
     id: 'c6',
     name: 'Ar-condicionado',
     slug: 'ar-condicionado',
     icon: 'wind',
     group: 'Manutenção e Técnicos',
+    suggested_services: ['Instalação', 'Limpeza de filtros', 'Carga de gás'],
   },
-  { id: 'c7', name: 'Informática', slug: 'informatica', icon: 'monitor', group: 'Tecnologia' },
-  { id: 'c8', name: 'Pintor', slug: 'pintor', icon: 'paintbrush', group: 'Casa e Construção' },
-  { id: 'c9', name: 'Frete', slug: 'frete', icon: 'truck', group: 'Transporte e Frete' },
+  {
+    id: 'c7',
+    name: 'Informática',
+    slug: 'informatica',
+    icon: 'monitor',
+    group: 'Tecnologia',
+    suggested_services: ['Formatação', 'Montagem de PC', 'Remoção de vírus'],
+  },
+  {
+    id: 'c8',
+    name: 'Pintor',
+    slug: 'pintor',
+    icon: 'paintbrush',
+    group: 'Casa e Construção',
+    suggested_services: ['Pintura interna', 'Pintura externa', 'Massa corrida'],
+  },
+  {
+    id: 'c9',
+    name: 'Frete',
+    slug: 'frete',
+    icon: 'truck',
+    group: 'Transporte e Frete',
+    suggested_services: ['Mudanças', 'Transporte de cargas', 'Montagem de móveis'],
+  },
   {
     id: 'c10',
     name: 'Advogado',
     slug: 'advogado',
     icon: 'briefcase',
     group: 'Profissionais Especializados',
+    suggested_services: ['Consultoria jurídica', 'Causas trabalhistas', 'Direito de família'],
   },
 ]
 
@@ -170,6 +219,8 @@ export const MOCK_PROFESSIONALS: Professional[] = [
       'https://img.usecurling.com/p/400/300?q=electrical%20panel',
     ],
     working_hours: 'Seg-Sexta: 08h às 18h | Sábado: 08h às 12h',
+    premium_highlight: 'top1',
+    subscription_status: 'active',
   },
   {
     id: 'p2',
@@ -187,6 +238,8 @@ export const MOCK_PROFESSIONALS: Professional[] = [
       'https://img.usecurling.com/p/400/300?q=living%20room',
     ],
     working_hours: 'Seg-Sábado: 07h às 17h',
+    premium_highlight: 'recommended',
+    subscription_status: 'active',
   },
   {
     id: 'p3',
@@ -204,6 +257,7 @@ export const MOCK_PROFESSIONALS: Professional[] = [
       'https://img.usecurling.com/p/400/300?q=water%20pipe',
     ],
     working_hours: 'Atendimento 24h Emergencial',
+    subscription_status: 'expired',
   },
   {
     id: 'p4',
@@ -221,6 +275,7 @@ export const MOCK_PROFESSIONALS: Professional[] = [
       'https://img.usecurling.com/p/400/300?q=paint%20bucket',
     ],
     working_hours: 'Seg-Sexta: 08h às 17h',
+    subscription_status: 'active',
   },
   {
     id: 'p5',
