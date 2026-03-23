@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -15,12 +15,21 @@ import {
 } from '@/components/ui/select'
 import { CATEGORY_GROUPS, NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
 
-export function Hero() {
+export function Hero({
+  selectedNeighborhoods,
+  onNeighborhoodChange,
+}: {
+  selectedNeighborhoods?: string[]
+  onNeighborhoodChange?: (val: string[]) => void
+}) {
   const [query, setQuery] = useState('')
   const [segment, setSegment] = useState('todos')
   const [category, setCategory] = useState('todas')
-  const [neighborhoods, setNeighborhoods] = useState<string[]>([])
+  const [internalNeighborhoods, setInternalNeighborhoods] = useState<string[]>([])
   const navigate = useNavigate()
+
+  const neighborhoods = selectedNeighborhoods ?? internalNeighborhoods
+  const setNeighborhoods = onNeighborhoodChange ?? setInternalNeighborhoods
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()

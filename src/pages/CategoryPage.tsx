@@ -1,9 +1,11 @@
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { useMemo } from 'react'
 import useMainStore from '@/stores/main'
 import { ProfessionalCard } from '@/components/ProfessionalCard'
 import { Building2, SearchX, Globe, Facebook, Instagram, Phone } from 'lucide-react'
 import { CATEGORY_GROUPS } from '@/stores/mockData'
+import { MapSection } from '@/components/home/MapSection'
+import { Button } from '@/components/ui/button'
 
 export default function CategoryPage() {
   const { slug } = useParams()
@@ -47,6 +49,34 @@ export default function CategoryPage() {
 
   const activeAds = ads.filter((a) => a.active)
 
+  const expandedCategories = useMemo(() => {
+    if (normalizedSlug === 'todas' || normalizedSlug === 'todos') {
+      return ['todas']
+    }
+    const expanded = new Set<string>([normalizedSlug])
+    Object.entries(CATEGORY_GROUPS).forEach(([group, cats]) => {
+      const groupSlug = group.toLowerCase().replace(/\s+/g, '-')
+      if (groupSlug === slug) {
+        expanded.add(group.toLowerCase())
+        cats.forEach((c) => expanded.add(c.toLowerCase()))
+      }
+      if (cats.some((c) => c.toLowerCase().replace(/\s+/g, '-') === slug)) {
+        expanded.add(group.toLowerCase())
+        expanded.add(slug)
+      }
+    })
+    return Array.from(expanded)
+  }, [normalizedSlug, slug])
+
+  const filteredAds = useMemo(() => {
+    if (expandedCategories.includes('todas')) {
+      return activeAds
+    }
+    return activeAds.filter((ad) =>
+      ad.targetCategories.some((tc) => expandedCategories.includes(tc.toLowerCase())),
+    )
+  }, [activeAds, expandedCategories])
+
   return (
     <div className="min-h-screen bg-background pt-24 pb-20">
       <div className="container mx-auto px-4">
@@ -61,28 +91,34 @@ export default function CategoryPage() {
             <p className="text-muted-foreground">Tente buscar por outros termos ou categorias.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredPros.map((pro) => (
               <ProfessionalCard key={pro.id} pro={pro} />
             ))}
           </div>
         )}
+      </div>
 
-        {activeAds.length > 0 && (
-          <div className="mt-20 pt-16 border-t border-border">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-secondary mb-4 flex items-center justify-center gap-3">
-                <Building2 className="text-primary w-8 h-8" />
-                Empresas Parceiras
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Conheça os fornecedores e empresas recomendadas que apoiam nossa plataforma e estão
-                visíveis em todas as categorias.
-              </p>
-            </div>
+      <div className="mt-16 border-t border-border">
+        <MapSection />
+      </div>
 
+      <div className="container mx-auto px-4">
+        <div className="pt-16 pb-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-secondary mb-4 flex items-center justify-center gap-3">
+              <Building2 className="text-primary w-8 h-8" />
+              Empresas Parceiras
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Conheça os fornecedores e empresas recomendadas para esta categoria, que apoiam nossa
+              plataforma com produtos e serviços de excelência.
+            </p>
+          </div>
+
+          {filteredAds.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {activeAds.map((ad) => (
+              {filteredAds.map((ad) => (
                 <div
                   key={ad.id}
                   className="bg-white border rounded-2xl overflow-hidden hover:shadow-elevation transition-all group flex flex-col"
@@ -156,8 +192,22 @@ export default function CategoryPage() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-12 bg-white rounded-3xl border shadow-sm max-w-2xl mx-auto">
+              <Building2 className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold mb-2">
+                Seja o primeiro parceiro desta categoria!
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Ainda não temos empresas parceiras cadastradas para esta área. Anuncie sua marca e
+                ganhe destaque para todos os clientes que buscam por estes serviços.
+              </p>
+              <Button asChild>
+                <Link to="/anunciar-empresa">Divulgar minha Empresa</Link>
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -25,23 +25,11 @@ export function ContextualAds({ categories, layout = 'vertical' }: Props) {
   }, [categories])
 
   const displayAds = useMemo(() => {
-    let matching = ads.filter(
+    return ads.filter(
       (ad) =>
         ad.active &&
         ad.targetCategories.some((tc) => expandedCategories.includes(tc.toLowerCase())),
     )
-
-    // Fallback logic: If no specific partner is found, show general ads to ensure no segment is left empty.
-    if (matching.length === 0) {
-      matching = ads.filter((ad) => ad.active && ad.isGeneral).slice(0, 3)
-    }
-
-    // Absolute fallback if still empty
-    if (matching.length === 0) {
-      matching = ads.filter((ad) => ad.active).slice(0, 2)
-    }
-
-    return matching
   }, [ads, expandedCategories])
 
   if (displayAds.length === 0) return null
