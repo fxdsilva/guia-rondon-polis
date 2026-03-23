@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
-import { Star, MapPin, BadgeCheck, MessageCircle, Clock, CheckCircle2 } from 'lucide-react'
+import { Link, useParams } from 'react-router-dom'
+import { Edit3, Star, MapPin, BadgeCheck, MessageCircle, Clock, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -9,7 +9,7 @@ import NotFound from './NotFound'
 
 const ProfessionalPage = () => {
   const { id } = useParams()
-  const { professionals } = useMainStore()
+  const { professionals, currentUserId } = useMainStore()
   const pro = useMemo(() => professionals.find((p) => p.id === id), [id, professionals])
 
   if (!pro) return <NotFound />
@@ -23,6 +23,17 @@ const ProfessionalPage = () => {
 
   return (
     <div className="bg-muted/30 min-h-screen pb-32 md:pb-12">
+      {pro.id === currentUserId && (
+        <div className="bg-primary/10 border-b border-primary/20 text-primary px-4 py-3 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 animate-fade-in">
+          <span className="font-medium text-sm sm:text-base">Este é o seu perfil público.</span>
+          <Button asChild size="sm" className="shadow-sm font-semibold h-8">
+            <Link to="/editar-perfil">
+              <Edit3 className="w-4 h-4 mr-2" />
+              Editar Perfil
+            </Link>
+          </Button>
+        </div>
+      )}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between">

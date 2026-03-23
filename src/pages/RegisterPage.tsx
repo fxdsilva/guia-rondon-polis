@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, Wand2, UploadCloud, Edit3, X } from 'lucide-react'
+import { Wand2, UploadCloud, Edit3, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -9,80 +9,14 @@ import { CATEGORY_OPTIONS, NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
 import useMainStore from '@/stores/main'
 import { MultiSelect } from '@/components/MultiSelect'
 import { ImageCropper } from '@/components/ImageCropper'
-
-const getAISuggestions = (cats: string[]) => {
-  const suggestions: Record<string, string[]> = {
-    Eletricista: [
-      'Instalação de tomadas',
-      'Troca de fiação',
-      'Quadro de luz',
-      'Projetos elétricos',
-      'Manutenção preventiva',
-    ],
-    Encanador: [
-      'Caça-vazamentos',
-      'Desentupimento',
-      'Instalação de pias',
-      "Limpeza de caixa d'água",
-      'Tubulação',
-    ],
-    Diarista: [
-      'Faxina geral',
-      'Limpeza pós-obra',
-      'Passadoria',
-      'Organização de armários',
-      'Limpeza de vidros',
-    ],
-    Mecânico: [
-      'Revisão geral',
-      'Troca de óleo',
-      'Suspensão',
-      'Freios',
-      'Injeção eletrônica',
-      'Alinhamento',
-    ],
-    Pedreiro: ['Alvenaria', 'Reboco', 'Contra-piso', 'Assentamento de porcelanato', 'Laje'],
-    'Ar-condicionado': [
-      'Instalação',
-      'Limpeza de filtros',
-      'Carga de gás',
-      'Manutenção corretiva',
-      'Higienização profunda',
-    ],
-    Informática: [
-      'Formatação',
-      'Montagem de PC',
-      'Remoção de vírus',
-      'Configuração de redes',
-      'Recuperação de dados',
-    ],
-    Pintor: [
-      'Pintura interna',
-      'Pintura externa',
-      'Massa corrida',
-      'Textura',
-      'Grafiato',
-      'Verniz',
-    ],
-  }
-  let result: string[] = []
-  cats.forEach((c) => {
-    if (suggestions[c]) result.push(...suggestions[c])
-  })
-  if (result.length === 0)
-    result = [
-      'Atendimento a domicílio',
-      'Orçamento sem compromisso',
-      'Serviço com garantia',
-      'Pagamento facilitado',
-    ]
-  return Array.from(new Set(result)).slice(0, 8)
-}
+import { getAISuggestions } from '@/lib/utils'
+import { useToast } from '@/hooks/use-toast'
 
 const RegisterPage = () => {
   const [step, setStep] = useState(1)
   const navigate = useNavigate()
-  const { addProfessional } = useMainStore()
+  const { addProfessional, setCurrentUserId } = useMainStore()
+  const { toast } = useToast()
   const [isGenerating, setIsGenerating] = useState(false)
   const [cropData, setCropData] = useState<{ src: string; type: 'profile' | 'gallery' } | null>(
     null,
@@ -110,11 +44,19 @@ const RegisterPage = () => {
     setIsGenerating(true)
     setTimeout(() => {
       const catsText = formData.categories.includes('Outro')
-        ? formData.customCategory
+        ? formData.customCategory || 'serviços diversos'
         : formData.categories.join(' e ')
+
+      const regionsText =
+        formData.neighborhoods.length > 0
+          ? formData.neighborhoods.includes('Todos os bairros')
+            ? 'em toda Rondonópolis'
+            : `nas regiões de ${formData.neighborhoods.join(', ')}`
+          : 'em Rondonópolis'
+
       setFormData((prev) => ({
         ...prev,
-        description: `Sou profissional especializado em ${catsText} com vasta experiência em Rondonópolis. Prezo pela excelência, pontualidade e satisfação total dos meus clientes. Entre em contato para um orçamento detalhado e sem compromisso!`,
+        description: `Sou profissional especializado em ${catsText} com vasta experiência ${regionsText}. Prezo pela excelência, pontualidade e satisfação total dos meus clientes. Entre em contato para um orçamento detalhado e sem compromisso!`,
       }))
       setIsGenerating(false)
     }, 1200)
@@ -167,8 +109,10 @@ const RegisterPage = () => {
       finalCategories.push(formData.customCategory)
     }
 
+    const newId = `new-${Date.now()}`
+
     addProfessional({
-      id: `new-${Date.now()}`,
+      id: newId,
       name: formData.name,
       categories: finalCategories,
       rating: 5.0,
@@ -187,35 +131,19 @@ const RegisterPage = () => {
       reviews: [],
       workingHours: 'A combinar',
     })
-    setStep(5)
-  }
 
-  if (step === 5)
-    return (
-      <div className="container mx-auto px-4 py-20 max-w-lg text-center animate-fade-in-up flex flex-col items-center">
-        <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
-          <CheckCircle2 className="w-12 h-12" />
-        </div>
-        <h2 className="text-3xl font-bold mb-4">Cadastro Enviado!</h2>
-        <p className="text-muted-foreground mb-8">
-          Seu perfil foi criado e está em análise. Em breve você estará visível para milhares de
-          clientes em Rondonópolis.
-        </p>
-        <div className="flex flex-col gap-3 w-full">
-          <Button size="lg" variant="outline" onClick={() => setStep(1)} className="w-full gap-2">
-            <Edit3 className="w-4 h-4" /> Editar Dados
-          </Button>
-          <Button size="lg" onClick={() => navigate('/')} className="w-full">
-            Voltar para o Início
-          </Button>
-        </div>
-      </div>
-    )
+    setCurrentUserId(newId)
+    toast({
+      title: 'Cadastro Concluído!',
+      description: 'Seu perfil profissional foi criado com sucesso.',
+    })
+    navigate(`/profissional/${newId}`)
+  }
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl relative">
       <div className="mb-10 text-center">
-        <h1 className="text-3xl font-bold text-secondary mb-2">Cadastre seus Serviços</h1>
+        <h1 className="text-3xl font-bold text-secondary mb-2">Anuncie seus Serviços</h1>
         <p className="text-muted-foreground">
           Preencha os dados abaixo para criar seu perfil profissional no guia.
         </p>
@@ -241,12 +169,12 @@ const RegisterPage = () => {
           <div className="space-y-6">
             <h3 className="text-xl font-semibold mb-4 border-b pb-2">Informações Pessoais</h3>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Nome Completo ou Empresa</label>
+              <label className="text-sm font-medium">Nome Completo</label>
               <Input
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="João da Silva Serviços"
+                placeholder="João da Silva"
               />
             </div>
             <div className="space-y-2">
@@ -328,7 +256,7 @@ const RegisterPage = () => {
             <h3 className="text-xl font-semibold mb-4 border-b pb-2">Detalhes do Serviço</h3>
             <div className="space-y-2 relative">
               <div className="flex justify-between items-end mb-1">
-                <label className="text-sm font-medium">Descrição sobre você</label>
+                <label className="text-sm font-medium">Sobre o Profissional</label>
                 <Button
                   type="button"
                   variant="outline"
@@ -472,11 +400,11 @@ const RegisterPage = () => {
                 </div>
               </div>
               <div>
-                <p className="font-medium text-muted-foreground mb-1">Sobre</p>
+                <p className="font-medium text-muted-foreground mb-1">Sobre o Profissional</p>
                 <p className="bg-muted/30 p-3 rounded-lg leading-relaxed">{formData.description}</p>
               </div>
               <div>
-                <p className="font-medium text-muted-foreground mb-2">Serviços Específicos</p>
+                <p className="font-medium text-muted-foreground mb-2">Serviços Oferecidos</p>
                 <div className="flex flex-wrap gap-2">
                   {formData.services.split(',').map(
                     (s, i) =>

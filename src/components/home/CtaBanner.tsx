@@ -11,17 +11,16 @@ export function CtaBanner() {
           Você presta serviços em Rondonópolis?
         </h2>
         <p className="text-primary-foreground/90 text-lg mb-10 max-w-2xl mx-auto">
-          Crie seu perfil gratuitamente, aumente sua visibilidade na cidade e receba contatos direto
-          no seu WhatsApp todos os dias.
+          Crie seu perfil, aumente sua visibilidade na cidade e receba contatos direto no seu
+          WhatsApp todos os dias.
         </p>
         <Button
           asChild
           size="lg"
-          variant="secondary"
-          className="text-primary font-bold px-8 h-14 text-lg group"
+          className="bg-white text-primary hover:bg-white/90 font-bold px-8 h-14 text-lg group shadow-xl border-none"
         >
           <Link to="/cadastrar">
-            Cadastre-se Grátis
+            Anuncie seu Serviço
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
         </Button>

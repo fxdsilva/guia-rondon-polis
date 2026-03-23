@@ -11,11 +11,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { CATEGORY_GROUPS } from '@/stores/mockData'
+import useMainStore from '@/stores/main'
 
 const getSlug = (str: string) => str.toLowerCase().replace(/\s+/g, '-')
 
 export default function Layout() {
   const location = useLocation()
+  const { currentUserId } = useMainStore()
 
   const NavLinks = () => (
     <>
@@ -47,10 +49,10 @@ export default function Layout() {
       </DropdownMenu>
 
       <Link
-        to="/cadastrar"
+        to={currentUserId ? '/editar-perfil' : '/cadastrar'}
         className="text-sm font-medium hover:text-primary transition-colors py-2"
       >
-        Cadastrar Serviço
+        {currentUserId ? 'Editar Perfil' : 'Anuncie seu Serviço'}
       </Link>
       <Link to="/admin" className="text-sm font-medium hover:text-primary transition-colors py-2">
         Admin
@@ -69,9 +71,19 @@ export default function Layout() {
 
           <nav className="hidden md:flex items-center gap-8">
             <NavLinks />
-            <Button asChild className="shadow-sm hover:shadow-md transition-all">
-              <Link to="/cadastrar">Anuncie Grátis</Link>
-            </Button>
+            {!currentUserId ? (
+              <Button asChild className="shadow-sm hover:shadow-md transition-all font-semibold">
+                <Link to="/cadastrar">Anuncie seu Serviço</Link>
+              </Button>
+            ) : (
+              <Button
+                asChild
+                variant="outline"
+                className="shadow-sm hover:shadow-md transition-all font-semibold"
+              >
+                <Link to={`/profissional/${currentUserId}`}>Meu Perfil</Link>
+              </Button>
+            )}
           </nav>
 
           <Sheet>
@@ -88,12 +100,18 @@ export default function Layout() {
                   Guia Rondonópolis
                 </SheetTitle>
               </SheetHeader>
-              <nav className="flex flex-col gap-2 mt-6 items-start">
+              <nav className="flex flex-col gap-2 mt-6 items-start w-full">
                 <NavLinks />
                 <div className="w-full mt-6 pt-6 border-t">
-                  <Button asChild className="w-full">
-                    <Link to="/cadastrar">Anuncie Grátis</Link>
-                  </Button>
+                  {!currentUserId ? (
+                    <Button asChild className="w-full font-semibold">
+                      <Link to="/cadastrar">Anuncie seu Serviço</Link>
+                    </Button>
+                  ) : (
+                    <Button asChild variant="outline" className="w-full font-semibold">
+                      <Link to={`/profissional/${currentUserId}`}>Meu Perfil</Link>
+                    </Button>
+                  )}
                 </div>
               </nav>
             </SheetContent>
@@ -133,7 +151,7 @@ export default function Layout() {
                   to="/cadastrar"
                   className="text-sm text-secondary-foreground/80 hover:text-white transition-colors"
                 >
-                  Seja um Profissional
+                  Anuncie seu Serviço
                 </Link>
               </li>
               <li>

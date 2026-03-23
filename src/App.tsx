@@ -8,6 +8,7 @@ import Index from './pages/Index'
 import CategoryPage from './pages/CategoryPage'
 import ProfessionalPage from './pages/ProfessionalPage'
 import RegisterPage from './pages/RegisterPage'
+import EditProfilePage from './pages/EditProfilePage'
 import AdminPage from './pages/AdminPage'
 import NotFound from './pages/NotFound'
 
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/categoria/:slug" element={<CategoryPage />} />
             <Route path="/profissional/:id" element={<ProfessionalPage />} />
             <Route path="/cadastrar" element={<RegisterPage />} />
+            <Route path="/editar-perfil" element={<EditProfilePage />} />
             <Route path="/admin" element={<AdminPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
