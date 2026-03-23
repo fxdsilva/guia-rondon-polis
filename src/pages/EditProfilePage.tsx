@@ -27,6 +27,8 @@ const EditProfilePage = () => {
     updateProfessional,
     categories,
     neighborhoods,
+    generateOtp,
+    verifyOtp,
   } = useMainStore()
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -34,7 +36,7 @@ const EditProfilePage = () => {
   const [loginPhone, setLoginPhone] = useState('')
   const [step, setStep] = useState<'phone' | 'otp'>('phone')
   const [otp, setOtp] = useState('')
-  const [pendingProId, setPendingProId] = useState<string | null>(null)
+  const [pendingPhone, setPendingPhone] = useState<string>('')
 
   const [formData, setFormData] = useState<any>(null)
 
@@ -55,46 +57,61 @@ const EditProfilePage = () => {
     }
   }, [currentUserId, populatedProfessionals])
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     const cleanPhone = loginPhone.replace(/\D/g, '')
     const pro = populatedProfessionals.find((p) => p.phone === cleanPhone)
-    if (pro) {
-      setPendingProId(pro.id)
-      setStep('otp')
-      toast({
-        title: 'Código enviado!',
-        description: 'Verifique seu WhatsApp para continuar. (Para teste, digite 123456)',
-      })
-    } else {
-      toast({
+
+    if (!pro) {
+      return toast({
         title: 'Perfil não encontrado',
         description: 'Verifique se o número foi digitado corretamente.',
         variant: 'destructive',
       })
     }
-  }
 
-  const handleOtpSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (otp === '123456') {
-      setCurrentUserId(pendingProId)
-      toast({ title: 'Bem-vindo de volta!' })
+    const code = await generateOtp(cleanPhone)
+    if (code) {
+      setPendingPhone(cleanPhone)
+      setStep('otp')
+      toast({
+        title: 'Código gerado!',
+        description: `Para testes, utilize o código: ${code}`,
+      })
     } else {
       toast({
-        title: 'Código inválido',
-        description: 'Tente novamente.',
+        title: 'Erro',
+        description: 'Não foi possível gerar o código. Tente novamente mais tarde.',
         variant: 'destructive',
       })
     }
   }
 
-  const handleResendOtp = () => {
-    toast({
-      title: 'Código reenviado!',
-      description: 'Um novo código foi enviado para o seu WhatsApp.',
-    })
-    setOtp('')
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const proId = await verifyOtp(pendingPhone, otp)
+
+    if (proId) {
+      setCurrentUserId(proId)
+      toast({ title: 'Bem-vindo de volta!' })
+    } else {
+      toast({
+        title: 'Código inválido ou expirado',
+        description: 'Verifique o código e tente novamente.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleResendOtp = async () => {
+    const code = await generateOtp(pendingPhone)
+    if (code) {
+      toast({
+        title: 'Código reenviado!',
+        description: `Para testes, utilize o código: ${code}`,
+      })
+      setOtp('')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

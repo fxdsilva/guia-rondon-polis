@@ -14,6 +14,9 @@ CREATE TABLE categories (
   slug TEXT NOT NULL UNIQUE,
   icon TEXT,
   "group" TEXT,
+  emoji TEXT,
+  group_emoji TEXT,
+  suggested_services TEXT[],
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -42,6 +45,8 @@ CREATE TABLE professionals (
   image TEXT,
   gallery TEXT[],
   working_hours TEXT,
+  premium_highlight TEXT,
+  subscription_status TEXT DEFAULT 'active',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -77,3 +82,10 @@ CREATE TABLE advertisements (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE otps (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  phone TEXT NOT NULL,
+  code TEXT NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);

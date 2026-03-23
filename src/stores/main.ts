@@ -60,6 +60,8 @@ type MainStoreContextType = {
   addAd: (ad: Ad) => Promise<void>
   updateAd: (id: string, data: Partial<Ad>) => Promise<void>
   deleteAd: (id: string) => Promise<void>
+  generateOtp: (phone: string) => Promise<string | null>
+  verifyOtp: (phone: string, code: string) => Promise<string | null>
 }
 
 const MainStoreContext = createContext<MainStoreContextType | undefined>(undefined)
@@ -117,12 +119,32 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
           })
         }
 
-        if (!catRes.error && catRes.data && catRes.data.length > 0) {
-          setCategories((prev) => {
-            const existingIds = new Set(prev.map((c) => c.id))
-            const newItems = catRes.data.filter((i: any) => !existingIds.has(i.id))
-            return [...newItems, ...prev]
-          })
+        if (!catRes.error && catRes.data) {
+          if (catRes.data.length === 0) {
+            const seedCats = MOCK_CATEGORIES.map((c) => ({
+              id: c.id,
+              name: c.name,
+              slug: c.slug,
+              icon: c.icon,
+              group: c.group,
+              emoji: c.emoji,
+              group_emoji: c.groupEmoji,
+            }))
+            await supabase.from('categories' as any).insert(seedCats)
+            setCategories(MOCK_CATEGORIES)
+          } else {
+            const mappedCats = catRes.data.map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              slug: c.slug,
+              icon: c.icon,
+              group: c.group,
+              emoji: c.emoji,
+              groupEmoji: c.group_emoji,
+              suggested_services: c.suggested_services || [],
+            }))
+            setCategories(mappedCats)
+          }
         }
       } catch (err) {
         console.warn('Error fetching from Supabase, relying on local mock state', err)
@@ -297,6 +319,48 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const generateOtp = async (phone: string) => {
+    const pro = professionals.find((p) => p.phone === phone)
+    if (!pro) return null
+    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    const expiresAt = new Date(Date.now() + 10 * 60000).toISOString()
+    try {
+      await supabase
+        .from('otps' as any)
+        .delete()
+        .eq('phone', phone)
+      await supabase.from('otps' as any).insert([{ phone, code, expires_at: expiresAt }])
+      return code
+    } catch (e) {
+      console.error(e)
+      return null
+    }
+  }
+
+  const verifyOtp = async (phone: string, code: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('otps' as any)
+        .select('*')
+        .eq('phone', phone)
+        .eq('code', code)
+        .gte('expires_at', new Date().toISOString())
+        .single()
+
+      if (data && !error) {
+        const pro = professionals.find((p) => p.phone === phone)
+        await supabase
+          .from('otps' as any)
+          .delete()
+          .eq('phone', phone)
+        return pro?.id || null
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    return null
+  }
+
   return createElement(
     MainStoreContext.Provider,
     {
@@ -322,6 +386,8 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         addAd,
         updateAd,
         deleteAd,
+        generateOtp,
+        verifyOtp,
       },
     },
     children,
