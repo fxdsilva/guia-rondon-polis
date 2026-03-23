@@ -47,6 +47,7 @@ type MainStoreContextType = {
   ads: Ad[]
   populatedProfessionals: PopulatedProfessional[]
   currentUserId: string | null
+  isLoading: boolean
   setCurrentUserId: (id: string | null) => void
   togglePremium: (id: string) => Promise<void>
   toggleVerified: (id: string) => Promise<void>
@@ -69,7 +70,6 @@ type MainStoreContextType = {
 const MainStoreContext = createContext<MainStoreContextType | undefined>(undefined)
 
 export function MainStoreProvider({ children }: { children: ReactNode }) {
-  // Initialize state with mock data to ensure UI stability if network requests fail
   const [plans, setPlans] = useState<Plan[]>(MOCK_PLANS)
   const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES)
   const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>(MOCK_NEIGHBORHOODS)
@@ -78,6 +78,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
   const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS)
   const [ads, setAds] = useState<Ad[]>(MOCK_ADS)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchSupabaseData = async () => {
@@ -175,7 +176,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
           supabase.from('plans' as any).select('*'),
         ])
 
-        // Only override state if we actually received data from the real server
         if (dbC.data && dbC.data.length > 0)
           setCategories(dbC.data.map((c: any) => ({ ...c, groupEmoji: c.group_emoji })))
         if (dbN.data && dbN.data.length > 0) setNeighborhoods(dbN.data)
@@ -202,6 +202,8 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
           )
       } catch (err) {
         console.warn('Error fetching from Supabase, relying on local mock state', err)
+      } finally {
+        setIsLoading(false)
       }
     }
     fetchSupabaseData()
@@ -298,7 +300,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
       return proId
     } catch (e) {
       console.error(e)
-      // Fallback for mock environments
       const proId = `mock_id_${Date.now()}`
       const finalPro = { ...pro, id: proId }
       setProfessionals((prev) => [finalPro as Professional, ...prev])
@@ -434,12 +435,11 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
 
   const generateOtp = async (phone: string) => {
     try {
-      const { data: pro, error: proError } = await supabase
+      const { data: pro } = await supabase
         .from('professionals' as any)
         .select('id')
         .eq('phone', phone)
         .single()
-
       const proId = pro?.id || professionals.find((p) => p.phone === phone)?.id
       if (!proId) return null
 
@@ -511,6 +511,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         ads,
         populatedProfessionals,
         currentUserId,
+        isLoading,
         setCurrentUserId,
         togglePremium,
         toggleVerified,

@@ -21,10 +21,10 @@ import NotFound from './NotFound'
 
 const ProfessionalPage = () => {
   const { id } = useParams()
-  const { populatedProfessionals, currentUserId } = useMainStore()
+  const { populatedProfessionals, currentUserId, isLoading } = useMainStore()
 
   const pro = useMemo(
-    () => populatedProfessionals.find((p) => p.id === id),
+    () => populatedProfessionals.find((p) => String(p.id) === String(id)),
     [id, populatedProfessionals],
   )
 
@@ -55,6 +55,15 @@ const ProfessionalPage = () => {
       .filter((name, index, self) => self.indexOf(name) === index) // remove duplicates
   }, [pro?.services])
 
+  if (isLoading && !pro) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 pb-32">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+        <p className="text-muted-foreground animate-pulse font-medium">Carregando perfil...</p>
+      </div>
+    )
+  }
+
   if (!pro) return <NotFound />
 
   const isPremium = pro.plan?.id === PLAN_PREMIUM_ID
@@ -67,7 +76,7 @@ const ProfessionalPage = () => {
   }
 
   return (
-    <div className="bg-muted/30 min-h-screen pb-32 md:pb-12">
+    <div className="bg-muted/30 min-h-screen pb-32 md:pb-12 animate-fade-in">
       {pro.id === currentUserId && (
         <div className="bg-primary/10 border-b border-primary/20 text-primary px-4 py-3 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6 animate-fade-in">
           <span className="font-medium text-sm sm:text-base">Este é o seu perfil público.</span>
@@ -229,7 +238,7 @@ const ProfessionalPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 text-muted-foreground">
+                <div className="text-center py-12 text-muted-foreground bg-white rounded-2xl border shadow-sm">
                   Nenhuma foto disponível no momento.
                 </div>
               )}
@@ -259,7 +268,7 @@ const ProfessionalPage = () => {
                   </div>
                 ))}
                 {pro.reviews.length === 0 && (
-                  <div className="text-center py-12 text-muted-foreground">
+                  <div className="text-center py-12 text-muted-foreground bg-white rounded-2xl border shadow-sm">
                     Ainda não há avaliações para este profissional.
                   </div>
                 )}
