@@ -24,6 +24,8 @@ export type Professional = {
   gallery: string[]
   reviews: Review[]
   workingHours: string
+  hasAddress?: boolean
+  address?: string
 }
 
 export type Ad = {
@@ -238,6 +240,8 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     ],
     reviews: MOCK_REVIEWS,
     workingHours: 'Seg-Sexta: 08h às 18h | Sábado: 08h às 12h',
+    hasAddress: true,
+    address: 'Av. Amazonas, 1000, Centro',
   },
   {
     id: 'p2',
@@ -322,6 +326,8 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     ],
     reviews: MOCK_REVIEWS,
     workingHours: 'Seg-Sexta: 09h às 18h',
+    hasAddress: true,
+    address: 'Av. Bandeirantes, 250, Vila Operária',
   },
 ]
 

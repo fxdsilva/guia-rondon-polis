@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { CATEGORY_OPTIONS, NEIGHBORHOOD_OPTIONS } from '@/stores/mockData'
 import useMainStore from '@/stores/main'
 import { MultiSelect } from '@/components/MultiSelect'
@@ -32,6 +34,8 @@ const RegisterPage = () => {
     description: '',
     services: '',
     gallery: [] as string[],
+    hasAddress: false,
+    address: '',
   })
 
   const suggestedServices = useMemo(
@@ -130,6 +134,8 @@ const RegisterPage = () => {
       gallery: formData.gallery,
       reviews: [],
       workingHours: 'A combinar',
+      hasAddress: formData.hasAddress,
+      address: formData.hasAddress ? formData.address : '',
     })
 
     setCurrentUserId(newId)
@@ -138,6 +144,11 @@ const RegisterPage = () => {
       description: 'Seu perfil profissional foi criado com sucesso.',
     })
     navigate(`/profissional/${newId}`)
+  }
+
+  const getMapQuery = (address: string) => {
+    const suffix = address.toLowerCase().includes('rondon') ? '' : ', Rondonópolis, MT'
+    return encodeURIComponent(address + suffix)
   }
 
   return (
@@ -169,7 +180,7 @@ const RegisterPage = () => {
           <div className="space-y-6">
             <h3 className="text-xl font-semibold mb-4 border-b pb-2">Informações Pessoais</h3>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Nome Completo</label>
+              <Label>Nome Completo</Label>
               <Input
                 required
                 value={formData.name}
@@ -178,7 +189,7 @@ const RegisterPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">WhatsApp</label>
+              <Label>WhatsApp</Label>
               <Input
                 required
                 type="tel"
@@ -188,11 +199,11 @@ const RegisterPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center justify-between">
+              <Label className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <UploadCloud className="w-4 h-4" /> Foto de Perfil
                 </span>
-              </label>
+              </Label>
               <div className="flex items-center gap-4">
                 <div className="flex-1 relative">
                   <Input
@@ -211,6 +222,48 @@ const RegisterPage = () => {
                 )}
               </div>
             </div>
+
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Atendimento no Local</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Possuo um endereço físico para receber clientes.
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.hasAddress}
+                  onCheckedChange={(checked) => setFormData({ ...formData, hasAddress: checked })}
+                />
+              </div>
+              {formData.hasAddress && (
+                <div className="space-y-4 animate-fade-in-up">
+                  <div className="space-y-2">
+                    <Label>Endereço Físico</Label>
+                    <Input
+                      required
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      placeholder="Ex: Rua Exemplo, 123, Centro"
+                    />
+                  </div>
+                  {formData.address && formData.address.length > 5 && (
+                    <div className="w-full h-[200px] md:h-[250px] rounded-md overflow-hidden border shadow-inner relative bg-muted">
+                      <iframe
+                        src={`https://maps.google.com/maps?q=${getMapQuery(formData.address)}&z=15&output=embed`}
+                        width="100%"
+                        height="100%"
+                        frameBorder="0"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        className="absolute inset-0"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -218,9 +271,7 @@ const RegisterPage = () => {
           <div className="space-y-6">
             <h3 className="text-xl font-semibold mb-4 border-b pb-2">Área de Atuação</h3>
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Categorias (Pode selecionar mais de uma)
-              </label>
+              <Label>Categorias (Pode selecionar mais de uma)</Label>
               <MultiSelect
                 options={CATEGORY_OPTIONS}
                 selected={formData.categories}
@@ -230,7 +281,7 @@ const RegisterPage = () => {
             </div>
             {formData.categories.includes('Outro') && (
               <div className="space-y-2 animate-fade-in">
-                <label className="text-sm font-medium">Especifique a categoria</label>
+                <Label>Especifique a categoria</Label>
                 <Input
                   required
                   value={formData.customCategory}
@@ -240,7 +291,7 @@ const RegisterPage = () => {
               </div>
             )}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Regiões de Atendimento</label>
+              <Label>Regiões de Atendimento</Label>
               <MultiSelect
                 options={NEIGHBORHOOD_OPTIONS}
                 selected={formData.neighborhoods}
@@ -256,7 +307,7 @@ const RegisterPage = () => {
             <h3 className="text-xl font-semibold mb-4 border-b pb-2">Detalhes do Serviço</h3>
             <div className="space-y-2 relative">
               <div className="flex justify-between items-end mb-1">
-                <label className="text-sm font-medium">Sobre o Profissional</label>
+                <Label>Sobre o Profissional</Label>
                 <Button
                   type="button"
                   variant="outline"
@@ -277,9 +328,7 @@ const RegisterPage = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Serviços Específicos (separados por vírgula)
-              </label>
+              <Label>Serviços Específicos (separados por vírgula)</Label>
               <Input
                 required
                 value={formData.services}
@@ -305,12 +354,12 @@ const RegisterPage = () => {
               )}
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center justify-between">
+              <Label className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <UploadCloud className="w-4 h-4" /> Fotos do Trabalho (Máx 5)
                 </span>
                 <span className="text-xs text-muted-foreground">{formData.gallery.length}/5</span>
-              </label>
+              </Label>
               <Input
                 type="file"
                 accept="image/*"
@@ -378,6 +427,16 @@ const RegisterPage = () => {
                   <p className="text-muted-foreground">{formData.phone}</p>
                 </div>
               </div>
+
+              {formData.hasAddress && formData.address && (
+                <div className="bg-muted/30 p-3 rounded-lg border">
+                  <p className="font-medium text-muted-foreground text-xs uppercase mb-1">
+                    Endereço Físico
+                  </p>
+                  <p className="font-medium">{formData.address}</p>
+                </div>
+              )}
+
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="bg-muted/30 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
                   <p className="font-medium text-muted-foreground text-xs uppercase mb-1">
