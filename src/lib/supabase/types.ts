@@ -9,7 +9,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string
+          emoji: string | null
+          group: string | null
+          group_emoji: string | null
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          suggested_services: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string | null
+          group?: string | null
+          group_emoji?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          suggested_services?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          emoji?: string | null
+          group?: string | null
+          group_emoji?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          suggested_services?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -153,6 +188,36 @@ export const Constants = {
 // IMPORTANT: The TypeScript types above map UUID, TEXT, VARCHAR all to "string".
 // Use the COLUMN TYPES section below to know the real PostgreSQL type for each column.
 // Always use the correct PostgreSQL type when writing SQL migrations.
+
+// --- COLUMN TYPES (actual PostgreSQL types) ---
+// Use this to know the real database type when writing migrations.
+// "string" in TypeScript types above may be uuid, text, varchar, timestamptz, etc.
+// Table: categories
+//   id: uuid (not null, default: gen_random_uuid())
+//   name: text (not null)
+//   slug: text (not null)
+//   emoji: text (nullable)
+//   group: text (nullable)
+//   group_emoji: text (nullable)
+//   icon: text (nullable)
+//   suggested_services: _text (nullable)
+//   created_at: timestamp with time zone (not null, default: now())
+
+// --- CONSTRAINTS ---
+// Table: categories
+//   PRIMARY KEY categories_pkey: PRIMARY KEY (id)
+
+// --- ROW LEVEL SECURITY POLICIES ---
+// Table: categories
+//   Policy "Categories are deletable by everyone" (DELETE, PERMISSIVE) roles={public}
+//     USING: true
+//   Policy "Categories are insertable by everyone" (INSERT, PERMISSIVE) roles={public}
+//     WITH CHECK: true
+//   Policy "Categories are readable by everyone" (SELECT, PERMISSIVE) roles={public}
+//     USING: true
+//   Policy "Categories are updatable by everyone" (UPDATE, PERMISSIVE) roles={public}
+//     USING: true
+//     WITH CHECK: true
 
 // --- DATABASE FUNCTIONS ---
 // FUNCTION rls_auto_enable()

@@ -22,10 +22,38 @@ import NotFound from './NotFound'
 const ProfessionalPage = () => {
   const { id } = useParams()
   const { populatedProfessionals, currentUserId } = useMainStore()
+
   const pro = useMemo(
     () => populatedProfessionals.find((p) => p.id === id),
     [id, populatedProfessionals],
   )
+
+  const displayServices = useMemo(() => {
+    if (!pro?.services) return []
+
+    // Handles cases where data might come as a single comma-separated string,
+    // an array of strings, or an array of objects containing comma-separated strings.
+    let rawServices: any[] = []
+    if (typeof pro.services === 'string') {
+      rawServices = [pro.services as string]
+    } else if (Array.isArray(pro.services)) {
+      rawServices = pro.services
+    }
+
+    const extractedNames = rawServices.flatMap((s) => {
+      if (typeof s === 'string') return s.split(',')
+      if (s && typeof s === 'object') {
+        const name = s.name || s.title || ''
+        return name.split(',')
+      }
+      return []
+    })
+
+    return extractedNames
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0)
+      .filter((name, index, self) => self.indexOf(name) === index) // remove duplicates
+  }, [pro?.services])
 
   if (!pro) return <NotFound />
 
@@ -155,14 +183,14 @@ const ProfessionalPage = () => {
                 </p>
               </div>
 
-              {pro.services.length > 0 && (
+              {displayServices.length > 0 && (
                 <div className="bg-white p-6 rounded-2xl shadow-sm border">
-                  <h3 className="text-xl font-bold mb-4">Serviços Oferecidos</h3>
+                  <h3 className="text-xl font-bold mb-4 text-secondary">Serviços Oferecidos</h3>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    {pro.services.map((service) => (
-                      <div key={service.id} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <span className="text-secondary-foreground/80">{service.name}</span>
+                    {displayServices.map((serviceName, idx) => (
+                      <div key={idx} className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                        <span className="text-secondary-foreground font-medium">{serviceName}</span>
                       </div>
                     ))}
                   </div>
