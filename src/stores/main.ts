@@ -439,7 +439,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         .from('professionals' as any)
         .select('id')
         .eq('phone', phone)
-        .single()
+        .maybeSingle()
       const proId = pro?.id || professionals.find((p) => p.phone === phone)?.id
       if (!proId) return null
 
@@ -473,14 +473,14 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         .eq('phone', phone)
         .eq('code', code)
         .gte('expires_at', new Date().toISOString())
-        .single()
+        .maybeSingle()
 
       if (data && !error) {
         const { data: pro } = await supabase
           .from('professionals' as any)
           .select('id')
           .eq('phone', phone)
-          .single()
+          .maybeSingle()
         supabase
           .from('otps' as any)
           .delete()
