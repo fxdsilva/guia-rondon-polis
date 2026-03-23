@@ -1,10 +1,17 @@
-/* Home Page - Replace this page layout, components, content, behavior with what you want and translate to the language of the user */
+import { Hero } from '@/components/home/Hero'
+import { CategoriesGrid } from '@/components/home/CategoriesGrid'
+import { FeaturedPros } from '@/components/home/FeaturedPros'
+import { HowItWorks } from '@/components/home/HowItWorks'
+import { CtaBanner } from '@/components/home/CtaBanner'
+
 const Index = () => {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">
-        This is a example page ready to be rewritten with your own content
-      </h1>
+    <div className="flex flex-col w-full">
+      <Hero />
+      <CategoriesGrid />
+      <FeaturedPros />
+      <HowItWorks />
+      <CtaBanner />
     </div>
   )
 }
