@@ -362,11 +362,12 @@ const RegisterPage = () => {
             </div>
             <div className="space-y-2">
               <Label>Serviços Oferecidos (separados por vírgula)</Label>
-              <Input
+              <Textarea
                 required
                 value={formData.services}
                 onChange={(e) => setFormData({ ...formData, services: e.target.value })}
                 placeholder="Ex: Manutenção, Instalação, Limpeza..."
+                className="min-h-[80px] resize-y"
               />
               {suggestedServices.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-2">

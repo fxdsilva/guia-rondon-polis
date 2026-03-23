@@ -147,8 +147,8 @@ const EditProfilePage = () => {
             <h1 className="text-2xl font-bold text-secondary mb-2">Atualizar Dados</h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {step === 'phone'
-                ? 'Digite seu número de WhatsApp cadastrado para acessar seu perfil.'
-                : 'Digite o código enviado para seu WhatsApp'}
+                ? 'Digite seu número de WhatsApp cadastrado para acessar seu perfil profissional.'
+                : 'Digite o código de acesso enviado para seu WhatsApp.'}
             </p>
           </div>
 
