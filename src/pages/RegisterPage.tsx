@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Wand2, UploadCloud, Edit3, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -148,9 +148,16 @@ const RegisterPage = () => {
     <div className="container mx-auto px-4 py-12 max-w-2xl relative">
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-bold text-secondary mb-2">Anuncie seus Serviços</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mb-6">
           Preencha os dados abaixo para criar seu perfil profissional no guia.
         </p>
+        <Button
+          asChild
+          variant="outline"
+          className="shadow-sm font-semibold border-primary/20 text-primary hover:bg-primary/5"
+        >
+          <Link to="/editar-perfil">Já tem um cadastro? Atualize seus dados</Link>
+        </Button>
       </div>
 
       <div className="flex items-center justify-between mb-8 relative px-4">

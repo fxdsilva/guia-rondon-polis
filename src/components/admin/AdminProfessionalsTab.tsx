@@ -23,7 +23,7 @@ import useMainStore from '@/stores/main'
 
 export function AdminProfessionalsTab() {
   const { populatedProfessionals, updateProfessional, togglePremium } = useMainStore()
-  const [filter, setFilter] = useState<'all' | 'premium'>('all')
+  const [filter, setFilter] = useState<'all' | 'premium' | 'pending'>('all')
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingPro, setEditingPro] = useState<any>(null)
   const [form, setForm] = useState({
@@ -34,6 +34,7 @@ export function AdminProfessionalsTab() {
 
   const filtered = populatedProfessionals.filter((p) => {
     if (filter === 'premium') return p.plan?.id === 'plan-premium'
+    if (filter === 'pending') return p.plan?.id === 'plan-pending'
     return true
   })
 
@@ -69,6 +70,7 @@ export function AdminProfessionalsTab() {
           <SelectContent>
             <SelectItem value="all">Todos os Profissionais</SelectItem>
             <SelectItem value="premium">Apenas Premium</SelectItem>
+            <SelectItem value="pending">Solicitações Premium</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -139,10 +141,19 @@ export function AdminProfessionalsTab() {
                   )}
                 </TableCell>
                 <TableCell className="text-center">
-                  <Switch
-                    checked={pro.plan?.id === 'plan-premium'}
-                    onCheckedChange={() => togglePremium(pro.id)}
-                  />
+                  {pro.plan_id === 'plan-pending' ? (
+                    <div className="flex flex-col items-center gap-1.5">
+                      <Badge className="bg-amber-500 hover:bg-amber-600 text-[10px] uppercase font-bold shadow-sm whitespace-nowrap px-1.5 py-0.5">
+                        Aprovar Pagamento
+                      </Badge>
+                      <Switch checked={false} onCheckedChange={() => togglePremium(pro.id)} />
+                    </div>
+                  ) : (
+                    <Switch
+                      checked={pro.plan?.id === 'plan-premium'}
+                      onCheckedChange={() => togglePremium(pro.id)}
+                    />
+                  )}
                 </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button
