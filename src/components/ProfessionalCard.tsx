@@ -41,24 +41,36 @@ export function ProfessionalCard({ pro }: Props) {
 
             <div className="flex-1 min-w-0">
               <div className="flex flex-col gap-1.5 mb-1">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-semibold text-lg truncate text-secondary group-hover:text-primary transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-semibold text-lg truncate text-secondary group-hover:text-primary transition-colors flex-1">
                     {pro.name}
                   </h3>
                   {pro.premium_highlight === 'top1' && (
-                    <Badge className="bg-[#FFD700] hover:bg-[#F2C800] text-amber-950 border-transparent shrink-0 shadow-sm gap-1 px-2">
-                      <Trophy className="w-3 h-3" /> Top 1 {pro.category?.name}
+                    <Badge className="bg-[#FFD700] hover:bg-[#F2C800] text-amber-950 border-transparent shrink-0 shadow-sm gap-1 px-2 whitespace-nowrap min-w-max">
+                      <Trophy className="w-3 h-3 shrink-0" />
+                      <span
+                        className="truncate max-w-[100px] sm:max-w-[140px]"
+                        title={`Top 1 ${pro.category?.name}`}
+                      >
+                        Top 1 {pro.category?.name}
+                      </span>
                     </Badge>
                   )}
                   {pro.premium_highlight === 'recommended' && (
-                    <Badge className="bg-[#3b82f6] hover:bg-[#2563eb] text-white border-transparent shrink-0 shadow-sm gap-1 px-2">
-                      <ThumbsUp className="w-3 h-3" /> Mais recomendado
+                    <Badge className="bg-[#3b82f6] hover:bg-[#2563eb] text-white border-transparent shrink-0 shadow-sm gap-1 px-2 whitespace-nowrap min-w-max">
+                      <ThumbsUp className="w-3 h-3 shrink-0" />
+                      <span
+                        className="truncate max-w-[100px] sm:max-w-[140px]"
+                        title="Mais recomendado"
+                      >
+                        Mais recomendado
+                      </span>
                     </Badge>
                   )}
                   {!pro.premium_highlight && isPremium && (
                     <Badge
                       variant="secondary"
-                      className="bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 shrink-0"
+                      className="bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 shrink-0 whitespace-nowrap min-w-max"
                     >
                       Premium
                     </Badge>
