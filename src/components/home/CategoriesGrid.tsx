@@ -100,8 +100,7 @@ export function CategoriesGrid() {
                 Serviços <span className="text-primary">em Alta</span>
               </h2>
               <p className="text-zinc-400 mt-1.5 text-sm md:text-base">
-                O carrossel pausa ao passar o mouse. Clique ou passe o mouse sobre um serviço para
-                ver os destaques.
+                Clique ou passe o mouse sobre um serviço para ver os destaques.
               </p>
             </div>
           </div>
