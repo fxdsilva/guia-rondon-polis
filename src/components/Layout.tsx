@@ -48,7 +48,10 @@ export default function Layout() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Link to="/admin" className="text-sm font-medium hover:text-primary transition-colors py-2">
+      <Link
+        to="/admin"
+        className="text-sm font-medium hover:text-primary transition-colors py-2 text-center"
+      >
         Admin
       </Link>
     </>
@@ -57,7 +60,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-16 items-center justify-between inline-flex">
           <Link to="/" className="flex items-center gap-2 group">
             <MapPin className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
             <span className="font-bold text-xl text-secondary">Guia Rondonópolis</span>

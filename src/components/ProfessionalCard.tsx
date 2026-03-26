@@ -41,7 +41,7 @@ export function ProfessionalCard({ pro }: Props) {
 
             <div className="flex-1 min-w-0">
               <div className="flex flex-col gap-1">
-                <h3 className="font-semibold text-base sm:text-lg leading-tight text-secondary group-hover:text-primary transition-colors break-words line-clamp-2">
+                <h3 className="font-semibold text-base sm:text-lg leading-tight text-secondary group-hover:text-primary transition-colors break-words line-clamp-2 text-center opacity-[1]">
                   {pro.name}
                 </h3>
 
@@ -82,10 +82,10 @@ export function ProfessionalCard({ pro }: Props) {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm font-medium">
+                  <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm font-medium font-serif">
                     <Star className="w-4 h-4 fill-accent text-accent shrink-0" />
                     <span>{pro.rating.toFixed(1)}</span>
-                    <span className="text-muted-foreground font-normal text-xs sm:text-sm break-words">
+                    <span className="text-muted-foreground font-normal text-xs sm:text-sm break-words font-serif">
                       ({pro.reviewsCount} {pro.reviewsCount === 1 ? 'avaliação' : 'avaliações'})
                     </span>
                   </div>
