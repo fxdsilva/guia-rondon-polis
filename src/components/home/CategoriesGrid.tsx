@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Autoplay from 'embla-carousel-autoplay'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import {
@@ -19,6 +19,7 @@ export function CategoriesGrid() {
   const { categories, populatedProfessionals } = useMainStore()
   const [activeCategory, setActiveCategory] = useState<Category | null>(null)
   const prosSectionRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
 
   const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true }))
 
@@ -62,13 +63,7 @@ export function CategoriesGrid() {
   }, [activeCategory, populatedProfessionals])
 
   const handleCategoryClick = (cat: Category) => {
-    setActiveCategory(cat)
-    if (window.innerWidth < 768 && prosSectionRef.current) {
-      const yOffset = -80
-      const element = prosSectionRef.current
-      const y = element.getBoundingClientRect().top + window.scrollY + yOffset
-      window.scrollTo({ top: y, behavior: 'smooth' })
-    }
+    navigate(`/categoria/${cat.slug}`)
   }
 
   const getImageUrl = (name: string) => {

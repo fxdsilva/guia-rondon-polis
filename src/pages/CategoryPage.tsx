@@ -49,7 +49,7 @@ export default function CategoryPage() {
       const rank = (p: PopulatedProfessional) => {
         if (p.premium_highlight === 'top1') return 4
         if (p.premium_highlight === 'recommended') return 3
-        if (p.plan?.id === PLAN_PREMIUM_ID) return 2
+        if (p.plan?.id === PLAN_PREMIUM_ID || p.plan_id === PLAN_PREMIUM_ID) return 2
         return 1
       }
       const rankDiff = rank(b) - rank(a)
