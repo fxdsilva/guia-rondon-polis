@@ -20,6 +20,7 @@ interface MultiSelectProps {
   onChange: (selected: string[]) => void
   placeholder?: string
   searchPlaceholder?: string
+  className?: string
 }
 
 export function MultiSelect({
@@ -28,6 +29,7 @@ export function MultiSelect({
   onChange,
   placeholder = 'Selecione...',
   searchPlaceholder = 'Buscar...',
+  className,
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -68,7 +70,10 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between h-auto min-h-10 px-3 py-2 text-left font-normal border-input"
+          className={cn(
+            'w-full justify-between h-auto min-h-10 px-3 py-2 text-left font-normal border-input',
+            className,
+          )}
         >
           <div className="flex flex-wrap gap-1.5 items-center flex-1 pr-2">
             {selected.length === 0 && <span className="text-muted-foreground">{placeholder}</span>}

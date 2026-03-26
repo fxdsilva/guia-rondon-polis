@@ -44,8 +44,7 @@ export default function Layout() {
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
-          ))}
-        </DropdownMenuContent>
+          </DropdownMenuContent>
       </DropdownMenu>
 
       <Link to="/admin" className="text-sm font-medium hover:text-primary transition-colors py-2">
@@ -56,7 +55,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
             <MapPin className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
@@ -178,10 +177,24 @@ export default function Layout() {
             <p className="text-sm text-secondary-foreground/80">contato@guiarondonopolis.com.br</p>
           </div>
         </div>
-        <div className="container mx-auto px-4 mt-12 pt-8 border-t border-white/10 text-center text-sm text-secondary-foreground/60">
+        <div className="container mx-auto px-4 mt-12 pt-8 border-t border-white/10 text-center text-sm text-secondary-foreground/60 mb-20 md:mb-0">
           &copy; {new Date().getFullYear()} Guia Rondonópolis. Todos os direitos reservados.
         </div>
       </footer>
+
+      {/* Floating Buttons */}
+      {!currentUserId && (
+        <Button
+          asChild
+          size="lg"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-6 md:translate-x-0 z-50 rounded-full shadow-elevation h-14 px-6 text-sm md:text-base font-bold bg-primary hover:bg-primary/90 text-white animate-fade-in-up hover:scale-105 transition-all flex items-center"
+        >
+          <Link to="/cadastrar">
+            <Megaphone className="w-5 h-5 mr-2 shrink-0" />
+            Anuncie seu Serviço
+          </Link>
+        </Button>
+      )}
 
       <a
         href="https://wa.me/5566999999999"
