@@ -12,26 +12,27 @@ import {
 import { Button } from '@/components/ui/button'
 import { ProfessionalCard } from '@/components/ProfessionalCard'
 import useMainStore from '@/stores/main'
-import { Category } from '@/stores/mockData'
+import { Category, PLAN_PREMIUM_ID } from '@/stores/mockData'
 import { cn } from '@/lib/utils'
 
 export function CategoriesGrid() {
   const { categories, populatedProfessionals } = useMainStore()
   const [activeCategory, setActiveCategory] = useState<Category | null>(null)
+  const prosSectionRef = useRef<HTMLDivElement>(null)
 
   const plugin = useRef(Autoplay({ delay: 3500, stopOnInteraction: true, stopOnMouseEnter: true }))
 
   const popularCategoryNames = [
-    'Pedreiro',
     'Eletricista',
     'Diarista',
-    'Mecânico',
+    'Pintor',
+    'Encanador',
     'Informática',
+    'Pedreiro',
+    'Mecânico',
     'Jardinagem',
-    'DJ',
     'Advogado',
     'Babá',
-    'Encanador',
   ]
 
   const popularCategories = useMemo(
@@ -55,11 +56,20 @@ export function CategoriesGrid() {
   const activePros = useMemo(() => {
     if (!activeCategory) return []
     const categoryPros = populatedProfessionals.filter((p) => p.category_id === activeCategory.id)
-    const premium = categoryPros.filter((p) => p.plan?.id === 'plan-premium')
+    const premium = categoryPros.filter((p) => p.plan_id === PLAN_PREMIUM_ID)
     if (premium.length > 0) return premium.slice(0, 4)
-    if (categoryPros.length > 0) return categoryPros.slice(0, 4)
-    return populatedProfessionals.filter((p) => p.plan?.id === 'plan-premium').slice(0, 4)
+    return categoryPros.slice(0, 4)
   }, [activeCategory, populatedProfessionals])
+
+  const handleCategoryClick = (cat: Category) => {
+    setActiveCategory(cat)
+    if (window.innerWidth < 768 && prosSectionRef.current) {
+      const yOffset = -80
+      const element = prosSectionRef.current
+      const y = element.getBoundingClientRect().top + window.scrollY + yOffset
+      window.scrollTo({ top: y, behavior: 'smooth' })
+    }
+  }
 
   const getImageUrl = (name: string) => {
     const map: Record<string, string> = {
@@ -73,6 +83,7 @@ export function CategoriesGrid() {
       Advogado: 'lawyer%20office',
       Babá: 'babysitter',
       Encanador: 'plumber',
+      Pintor: 'painter',
     }
     return `https://img.usecurling.com/p/400/600?q=${map[name] || encodeURIComponent(name.toLowerCase())}&dpr=2`
   }
@@ -104,7 +115,7 @@ export function CategoriesGrid() {
                 >
                   <div
                     onMouseEnter={() => setActiveCategory(cat)}
-                    onClick={() => setActiveCategory(cat)}
+                    onClick={() => handleCategoryClick(cat)}
                     className="group block relative w-full aspect-[2/3] rounded-xl overflow-hidden bg-zinc-800 shadow-xl transition-all duration-500 cursor-pointer"
                   >
                     <div
@@ -159,7 +170,10 @@ export function CategoriesGrid() {
 
       {/* Dynamic Pros Section */}
       {activeCategory && (
-        <section className="py-20 bg-muted/50 border-b border-border transition-colors duration-500 min-h-[450px]">
+        <section
+          ref={prosSectionRef}
+          className="py-20 bg-muted/50 border-b border-border transition-colors duration-500 min-h-[450px]"
+        >
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
               <div>

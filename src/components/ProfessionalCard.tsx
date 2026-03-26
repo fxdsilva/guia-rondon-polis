@@ -4,13 +4,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PopulatedProfessional } from '@/stores/main'
+import { PLAN_PREMIUM_ID } from '@/stores/mockData'
 
 interface Props {
   pro: PopulatedProfessional
 }
 
 export function ProfessionalCard({ pro }: Props) {
-  const isPremium = pro.plan?.id === 'plan-premium'
+  const isPremium = pro.plan_id === PLAN_PREMIUM_ID
 
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault()
