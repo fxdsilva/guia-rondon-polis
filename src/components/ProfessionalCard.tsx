@@ -48,23 +48,13 @@ export function ProfessionalCard({ pro }: Props) {
                   {pro.premium_highlight === 'top1' && (
                     <Badge className="bg-[#FFD700] hover:bg-[#F2C800] text-amber-950 border-transparent shrink-0 shadow-sm gap-1 px-2 whitespace-nowrap min-w-max">
                       <Trophy className="w-3 h-3 shrink-0" />
-                      <span
-                        className="truncate max-w-[100px] sm:max-w-[140px]"
-                        title={`Top 1 ${pro.category?.name}`}
-                      >
-                        Top 1 {pro.category?.name}
-                      </span>
+                      <span title={`Top 1 ${pro.category?.name}`}>Top 1 {pro.category?.name}</span>
                     </Badge>
                   )}
                   {pro.premium_highlight === 'recommended' && (
                     <Badge className="bg-[#3b82f6] hover:bg-[#2563eb] text-white border-transparent shrink-0 shadow-sm gap-1 px-2 whitespace-nowrap min-w-max">
                       <ThumbsUp className="w-3 h-3 shrink-0" />
-                      <span
-                        className="truncate max-w-[100px] sm:max-w-[140px]"
-                        title="Mais recomendado"
-                      >
-                        Mais recomendado
-                      </span>
+                      <span title="Mais recomendado">Mais recomendado</span>
                     </Badge>
                   )}
                   {!pro.premium_highlight && isPremium && (
