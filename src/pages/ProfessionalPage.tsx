@@ -31,28 +31,27 @@ const ProfessionalPage = () => {
   const displayServices = useMemo(() => {
     if (!pro?.services) return []
 
-    // Handles cases where data might come as a single comma-separated string,
-    // an array of strings, or an array of objects containing comma-separated strings.
     let rawServices: any[] = []
     if (typeof pro.services === 'string') {
-      rawServices = [pro.services as string]
+      rawServices = [pro.services]
     } else if (Array.isArray(pro.services)) {
       rawServices = pro.services
     }
 
-    const extractedNames = rawServices.flatMap((s) => {
-      if (typeof s === 'string') return s.split(',')
+    const extractedNames = rawServices.map((s) => {
+      if (typeof s === 'string') return s
       if (s && typeof s === 'object') {
-        const name = s.name || s.title || ''
-        return name.split(',')
+        return s.name || s.title || ''
       }
-      return []
+      return ''
     })
 
     return extractedNames
+      .join(',')
+      .split(',')
       .map((name) => name.trim())
       .filter((name) => name.length > 0)
-      .filter((name, index, self) => self.indexOf(name) === index) // remove duplicates
+      .filter((name, index, self) => self.indexOf(name) === index)
   }, [pro?.services])
 
   if (isLoading && !pro) {
@@ -194,12 +193,12 @@ const ProfessionalPage = () => {
 
               {displayServices.length > 0 && (
                 <div className="bg-white p-6 rounded-2xl shadow-sm border">
-                  <h3 className="text-xl font-bold mb-4 text-secondary">Serviços Oferecidos</h3>
+                  <h3 className="text-xl font-bold mb-4 text-slate-800">Serviços Oferecidos</h3>
                   <div className="grid sm:grid-cols-2 gap-4">
                     {displayServices.map((serviceName, idx) => (
                       <div key={idx} className="flex items-start gap-3">
                         <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                        <span className="text-secondary-foreground font-medium">{serviceName}</span>
+                        <span className="text-slate-700 font-medium">{String(serviceName)}</span>
                       </div>
                     ))}
                   </div>

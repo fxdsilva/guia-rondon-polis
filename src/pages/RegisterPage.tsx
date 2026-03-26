@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Wand2, UploadCloud, Edit3, X } from 'lucide-react'
+import { Wand2, UploadCloud, Edit3, X, Check, Copy, Instagram } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,6 +16,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import useMainStore from '@/stores/main'
 import { ImageCropper } from '@/components/ImageCropper'
 import { getAISuggestions } from '@/lib/utils'
@@ -31,6 +38,10 @@ const RegisterPage = () => {
   const [cropData, setCropData] = useState<{ src: string; type: 'profile' | 'gallery' } | null>(
     null,
   )
+
+  const [successModalOpen, setSuccessModalOpen] = useState(false)
+  const [createdProId, setCreatedProId] = useState('')
+  const [copied, setCopied] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -48,6 +59,11 @@ const RegisterPage = () => {
   const suggestedServices = useMemo(() => {
     const cat = categories.find((c) => c.id === formData.categoryId)
     return cat ? getAISuggestions([cat.name]) : []
+  }, [formData.categoryId, categories])
+
+  const instagramTemplate = useMemo(() => {
+    const catName = categories.find((c) => c.id === formData.categoryId)?.name || 'serviços'
+    return `Novidade por aqui! 🚀 Agora você me encontra oficialmente no @GuiaRondonopolis.\n\nSou especialista em ${catName} e estou pronto para atender toda a nossa cidade com qualidade e confiança. Acesse o guia e confira meu perfil completo!\n\n📍 Valorize os profissionais da nossa terra.\n#GuiaRondonopolis #Rondonopolis #ServiçosLocais`
   }, [formData.categoryId, categories])
 
   const generateAI = () => {
@@ -134,17 +150,31 @@ const RegisterPage = () => {
 
     if (newId) {
       setCurrentUserId(newId)
-      toast({
-        title: 'Cadastro Concluído!',
-        description: 'Seu perfil profissional foi salvo no banco de dados com sucesso.',
-      })
-      navigate(`/profissional/${newId}`)
+      setCreatedProId(newId)
+      setSuccessModalOpen(true)
     } else {
       toast({
         title: 'Erro',
         description: 'Ocorreu um erro ao salvar seu perfil. Tente novamente.',
         variant: 'destructive',
       })
+    }
+  }
+
+  const handleCopy = () => {
+    try {
+      navigator.clipboard.writeText(instagramTemplate)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy', err)
+    }
+  }
+
+  const handleGoToProfile = () => {
+    setSuccessModalOpen(false)
+    if (createdProId) {
+      navigate(`/profissional/${createdProId}`)
     }
   }
 
@@ -556,6 +586,67 @@ const RegisterPage = () => {
           onCancel={() => setCropData(null)}
         />
       )}
+
+      <Dialog
+        open={successModalOpen}
+        onOpenChange={(open) => {
+          if (!open) handleGoToProfile()
+        }}
+      >
+        <DialogContent className="sm:max-w-md text-center border-none shadow-2xl">
+          <DialogHeader>
+            <div className="mx-auto w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4 shadow-inner">
+              <Check className="w-8 h-8" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-slate-800">
+              Cadastro Concluído!
+            </DialogTitle>
+            <DialogDescription className="text-base text-slate-600 pt-2">
+              Seu perfil já está no ar. Que tal avisar seus clientes no Instagram e aumentar sua
+              visibilidade?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="bg-slate-50 p-5 rounded-xl text-left my-4 relative group border border-slate-100 shadow-sm">
+            <p className="text-sm whitespace-pre-wrap text-slate-700 leading-relaxed font-medium">
+              {instagramTemplate}
+            </p>
+            <Button
+              size="icon"
+              variant="outline"
+              className="absolute top-3 right-3 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-sm"
+              onClick={handleCopy}
+              title="Copiar texto"
+            >
+              {copied ? (
+                <Check className="w-4 h-4 text-green-600" />
+              ) : (
+                <Copy className="w-4 h-4 text-slate-600" />
+              )}
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <Button
+              className="w-full h-14 text-base font-bold gap-2 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 hover:from-purple-700 hover:via-pink-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg transition-all"
+              onClick={() => {
+                handleCopy()
+                window.open('https://instagram.com', '_blank')
+              }}
+            >
+              <Instagram className="w-6 h-6" />
+              Copiar e Abrir Instagram
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full h-12 text-slate-600 font-semibold hover:bg-slate-100"
+              onClick={handleGoToProfile}
+            >
+              Pular e ir para o Perfil
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
