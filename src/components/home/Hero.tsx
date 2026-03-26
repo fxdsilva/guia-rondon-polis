@@ -166,7 +166,7 @@ export function Hero({
           alt="Rondonópolis"
           className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay"
         />
-        <div className="relative z-10 container mx-auto px-4 py-20 md:py-28 flex flex-col items-center text-center">
+        <div className="relative z-10 container mx-auto px-4 pt-20 pb-36 md:pt-28 md:pb-48 flex flex-col items-center text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight max-w-4xl animate-fade-in-up">
             Encontre os melhores profissionais em <span className="text-primary">Rondonópolis</span>
           </h1>
