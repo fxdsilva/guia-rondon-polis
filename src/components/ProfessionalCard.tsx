@@ -96,7 +96,7 @@ export function ProfessionalCard({ pro }: Props) {
 
           <div className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
             <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-            <span className="break-words line-clamp-2 pb-[0px] shadow-[0px_0px_6px_0px_#808080]">
+            <span className="break-words line-clamp-2 pb-[0px] shadow-[0px_0px_6px_0px_transparent]">
               {pro.neighborhood?.name || 'Atende Rondonópolis'}
             </span>
           </div>
