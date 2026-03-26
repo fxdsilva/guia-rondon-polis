@@ -72,18 +72,20 @@ export function ProfessionalCard({ pro }: Props) {
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1 mt-1.5">
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <span className="shrink-0 flex items-center justify-center">
+                <div className="flex flex-col gap-1.5 mt-1.5">
+                  <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
+                    <span className="shrink-0 flex items-center justify-center mt-0.5">
                       {pro.category?.emoji}
                     </span>
-                    <span className="truncate">{pro.category?.name || 'Profissional'}</span>
+                    <span className="break-words leading-tight">
+                      {pro.category?.name || 'Profissional'}
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-1 text-sm font-medium">
+                  <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm font-medium">
                     <Star className="w-4 h-4 fill-accent text-accent shrink-0" />
                     <span>{pro.rating.toFixed(1)}</span>
-                    <span className="text-muted-foreground font-normal whitespace-nowrap ml-0.5">
+                    <span className="text-muted-foreground font-normal text-xs sm:text-sm break-words">
                       ({pro.reviewsCount} {pro.reviewsCount === 1 ? 'avaliação' : 'avaliações'})
                     </span>
                   </div>
