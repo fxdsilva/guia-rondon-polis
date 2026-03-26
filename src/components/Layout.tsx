@@ -44,7 +44,8 @@ export default function Layout() {
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
-          </DropdownMenuContent>
+          ))}
+        </DropdownMenuContent>
       </DropdownMenu>
 
       <Link to="/admin" className="text-sm font-medium hover:text-primary transition-colors py-2">
