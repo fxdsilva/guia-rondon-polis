@@ -170,7 +170,10 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
             .order('created_at', { ascending: false }),
           supabase.from('services' as any).select('*'),
           supabase.from('reviews' as any).select('*'),
-          supabase.from('advertisements' as any).select('*'),
+          supabase
+            .from('advertisements' as any)
+            .select('*')
+            .order('created_at', { ascending: false }),
           supabase.from('categories' as any).select('*'),
           supabase.from('neighborhoods' as any).select('*'),
           supabase.from('plans' as any).select('*'),

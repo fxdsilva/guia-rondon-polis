@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { PlusCircle } from 'lucide-react'
 import { Hero } from '@/components/home/Hero'
 import { CategoriesGrid } from '@/components/home/CategoriesGrid'
+import { WelcomeNewcomers } from '@/components/home/WelcomeNewcomers'
 import { HowItWorks } from '@/components/home/HowItWorks'
 import { CtaBanner } from '@/components/home/CtaBanner'
 import { MapSection } from '@/components/home/MapSection'
@@ -18,6 +19,7 @@ const Index = () => {
         onNeighborhoodChange={setSelectedNeighborhoods}
       />
       <CategoriesGrid />
+      <WelcomeNewcomers />
       <HowItWorks />
       <MapSection
         neighborhood={selectedNeighborhoods.length > 0 ? selectedNeighborhoods[0] : undefined}
