@@ -183,15 +183,35 @@ export function CategoriesGrid() {
                   Profissionais selecionados e altamente recomendados
                 </p>
               </div>
-              <Button asChild variant="outline" className="border-primary/20 hover:bg-primary/10">
-                <Link to={`/categoria/${activeCategory.slug}`}>
-                  Ver todos da categoria
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
+              {populatedProfessionals.length > 0 && (
+                <Button asChild variant="outline" className="border-primary/20 hover:bg-primary/10">
+                  <Link to={`/categoria/${activeCategory.slug}`}>
+                    Ver todos da categoria
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+              )}
             </div>
 
-            {activePros.length > 0 ? (
+            {populatedProfessionals.length === 0 ? (
+              <div className="w-full bg-white border rounded-2xl p-10 md:p-14 text-center shadow-sm max-w-4xl mx-auto animate-fade-in-up">
+                <div className="text-6xl mb-6">🚀</div>
+                <h3 className="text-2xl md:text-3xl font-bold text-secondary mb-4 leading-tight">
+                  Ainda não há profissionais cadastrados no sistema, mas isso é apenas o começo!
+                </h3>
+                <p className="text-muted-foreground text-lg md:text-xl mb-3">
+                  Em breve, novos talentos farão parte desta plataforma, trazendo conhecimento,
+                  dedicação e excelentes serviços.
+                </p>
+                <p className="text-muted-foreground text-lg md:text-xl mb-8">
+                  Estamos construindo um espaço cheio de oportunidades — fique atento, pois grandes
+                  profissionais estarão disponíveis em breve!
+                </p>
+                <Button asChild size="lg" className="font-semibold px-8 h-12 text-lg">
+                  <Link to="/cadastrar">Seja o primeiro a se cadastrar</Link>
+                </Button>
+              </div>
+            ) : activePros.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {activePros.map((pro, i) => (
                   <div
