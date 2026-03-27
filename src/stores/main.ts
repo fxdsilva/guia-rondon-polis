@@ -65,6 +65,7 @@ type MainStoreContextType = {
   deleteAd: (id: string) => Promise<void>
   generateOtp: (phone: string) => Promise<string | null>
   verifyOtp: (phone: string, code: string) => Promise<string | null>
+  deleteReview: (id: string) => Promise<void>
 }
 
 const MainStoreContext = createContext<MainStoreContextType | undefined>(undefined)
@@ -501,6 +502,18 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const deleteReview = async (id: string) => {
+    setReviews((prev) => prev.filter((r) => r.id !== id))
+    try {
+      await supabase
+        .from('reviews' as any)
+        .delete()
+        .eq('id', id)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   return createElement(
     MainStoreContext.Provider,
     {
@@ -529,6 +542,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         deleteAd,
         generateOtp,
         verifyOtp,
+        deleteReview,
       },
     },
     children,

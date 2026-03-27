@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Edit2 } from 'lucide-react'
+import { Edit2, CheckCircle2, Trash2, Star, CreditCard } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -19,14 +19,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import useMainStore from '@/stores/main'
+import { useToast } from '@/hooks/use-toast'
 
 export function AdminProfessionalsTab() {
-  const { populatedProfessionals, updateProfessional, togglePremium } = useMainStore()
+  const { populatedProfessionals, reviews, updateProfessional, togglePremium, deleteReview } =
+    useMainStore()
+  const { toast } = useToast()
   const [filter, setFilter] = useState<'all' | 'premium' | 'pending'>('all')
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingPro, setEditingPro] = useState<any>(null)
+
   const [form, setForm] = useState({
+    name: '',
+    phone: '',
+    description: '',
+    address: '',
     premium_highlight: 'none',
     subscription_status: 'active',
     verified: false,
@@ -41,6 +52,10 @@ export function AdminProfessionalsTab() {
   const handleEdit = (pro: any) => {
     setEditingPro(pro)
     setForm({
+      name: pro.name || '',
+      phone: pro.phone || '',
+      description: pro.description || '',
+      address: pro.address || '',
       premium_highlight: pro.premium_highlight || 'none',
       subscription_status: pro.subscription_status || 'active',
       verified: pro.verified || false,
@@ -51,14 +66,29 @@ export function AdminProfessionalsTab() {
   const handleSave = () => {
     if (editingPro) {
       updateProfessional(editingPro.id, {
+        name: form.name,
+        phone: form.phone,
+        description: form.description,
+        address: form.address,
         premium_highlight:
           form.premium_highlight === 'none' ? null : (form.premium_highlight as any),
         subscription_status: form.subscription_status as any,
         verified: form.verified,
       })
+      toast({ title: 'Profissional atualizado com sucesso!' })
     }
     setIsSheetOpen(false)
   }
+
+  const handleRegisterPayment = () => {
+    setForm({ ...form, subscription_status: 'active' })
+    if (editingPro) {
+      updateProfessional(editingPro.id, { subscription_status: 'active' })
+    }
+    toast({ title: 'Pagamento registrado e assinatura ativada!' })
+  }
+
+  const proReviews = reviews.filter((r) => r.professional_id === editingPro?.id)
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -160,7 +190,7 @@ export function AdminProfessionalsTab() {
                     variant="ghost"
                     size="icon"
                     onClick={() => handleEdit(pro)}
-                    title="Editar Status Financeiro/Premium"
+                    title="Editar Profissional e Premium"
                   >
                     <Edit2 className="w-4 h-4 text-muted-foreground" />
                   </Button>
@@ -179,70 +209,184 @@ export function AdminProfessionalsTab() {
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent className="sm:max-w-md overflow-y-auto">
+        <SheetContent className="sm:max-w-md overflow-y-auto w-full">
           <SheetHeader className="mb-6">
-            <SheetTitle>Gerenciar Assinatura Premium</SheetTitle>
+            <SheetTitle>Gerenciar Profissional</SheetTitle>
           </SheetHeader>
-          <div className="space-y-6">
-            <div>
-              <p className="font-semibold text-lg">{editingPro?.name}</p>
-              <p className="text-sm text-muted-foreground">{editingPro?.category?.name}</p>
-            </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Status da Mensalidade</label>
-              <Select
-                value={form.subscription_status}
-                onValueChange={(v) => setForm({ ...form, subscription_status: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Pagamento em dia (Ativa)</SelectItem>
-                  <SelectItem value="expired">Atrasado / Inadimplente (Expirada)</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Controla o status de cobrança mensal deste profissional.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Destaque na Busca (Label)</label>
-              <Select
-                value={form.premium_highlight}
-                onValueChange={(v) => setForm({ ...form, premium_highlight: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sem destaque especial</SelectItem>
-                  <SelectItem value="recommended">Mais Recomendado (Ícone Azul)</SelectItem>
-                  <SelectItem value="top1">Top 1 da Categoria (Ícone Ouro)</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Define como o card aparecerá nas buscas da categoria.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between mt-4 p-4 border rounded-lg bg-muted/30">
-              <div>
-                <label className="text-sm font-medium text-secondary">Perfil Verificado</label>
-                <p className="text-xs text-muted-foreground">Concede o selo azul de confiança.</p>
-              </div>
-              <Switch
-                checked={form.verified}
-                onCheckedChange={(v) => setForm({ ...form, verified: v })}
-              />
-            </div>
-
-            <Button className="w-full mt-6" onClick={handleSave}>
-              Salvar Alterações
-            </Button>
+          <div className="mb-6">
+            <p className="font-semibold text-lg">{form.name || editingPro?.name}</p>
+            <p className="text-sm text-muted-foreground">{editingPro?.category?.name}</p>
           </div>
+
+          <Tabs defaultValue="assinatura" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/50 p-1">
+              <TabsTrigger value="assinatura" className="text-xs sm:text-sm">
+                Assinatura
+              </TabsTrigger>
+              <TabsTrigger value="dados" className="text-xs sm:text-sm">
+                Dados
+              </TabsTrigger>
+              <TabsTrigger value="avaliacoes" className="text-xs sm:text-sm">
+                Avaliações
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="assinatura" className="space-y-6 animate-fade-in">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status da Mensalidade</label>
+                <Select
+                  value={form.subscription_status}
+                  onValueChange={(v) => setForm({ ...form, subscription_status: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Pagamento em dia (Ativa)</SelectItem>
+                    <SelectItem value="expired">Atrasado / Inadimplente (Expirada)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Controla o status de cobrança mensal deste profissional.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Destaque na Busca (Label)</label>
+                <Select
+                  value={form.premium_highlight}
+                  onValueChange={(v) => setForm({ ...form, premium_highlight: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sem destaque especial</SelectItem>
+                    <SelectItem value="recommended">Mais Recomendado (Ícone Azul)</SelectItem>
+                    <SelectItem value="top1">Top 1 da Categoria (Ícone Ouro)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Define como o card aparecerá nas buscas da categoria.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+                <div>
+                  <label className="text-sm font-medium text-secondary">Perfil Verificado</label>
+                  <p className="text-xs text-muted-foreground">Concede o selo azul de confiança.</p>
+                </div>
+                <Switch
+                  checked={form.verified}
+                  onCheckedChange={(v) => setForm({ ...form, verified: v })}
+                />
+              </div>
+
+              <div className="mt-6 border-t pt-6">
+                <h4 className="font-semibold text-sm mb-1 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" /> Sistema de Pagamento
+                </h4>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Registre pagamentos manuais (PIX/Transferência) realizados pelo profissional para
+                  renovar a assinatura.
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 border-green-200"
+                  onClick={handleRegisterPayment}
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  Registrar Pagamento Mensal
+                </Button>
+              </div>
+
+              <Button className="w-full mt-6" onClick={handleSave}>
+                Salvar Alterações
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="dados" className="space-y-4 animate-fade-in">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nome do Profissional</label>
+                <Input
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">WhatsApp</label>
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Endereço</label>
+                <Input
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Descrição</label>
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="h-32"
+                />
+              </div>
+              <Button className="w-full mt-6" onClick={handleSave}>
+                Salvar Alterações
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="avaliacoes" className="space-y-4 animate-fade-in">
+              <p className="text-xs text-muted-foreground mb-4">
+                Gerencie os comentários deixados pelos clientes. Você pode remover avaliações
+                ofensivas ou indevidas.
+              </p>
+              {proReviews.length > 0 ? (
+                proReviews.map((r) => (
+                  <div key={r.id} className="p-3 border rounded-lg bg-slate-50 relative group">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="font-semibold text-sm">{r.reviewer_name}</p>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3 h-3 ${i < r.rating ? 'fill-accent text-accent' : 'text-muted'}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => {
+                          deleteReview(r.id)
+                          toast({
+                            title: 'Avaliação removida',
+                            description: 'O comentário foi apagado do perfil do prestador.',
+                          })
+                        }}
+                        title="Remover avaliação"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{r.comment}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  Nenhuma avaliação encontrada para este profissional.
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
         </SheetContent>
       </Sheet>
     </div>
