@@ -1,0 +1,1 @@
+ALTER TABLE public.professionals ADD COLUMN IF NOT EXISTS whatsapp_clicks INTEGER NOT NULL DEFAULT 0;

@@ -144,6 +144,44 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          notes: string | null
+          payment_method: string
+          professional_id: string | null
+          status: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_method: string
+          professional_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          professional_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'payments_professional_id_fkey'
+            columns: ['professional_id']
+            isOneToOne: false
+            referencedRelation: 'professionals'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       plans: {
         Row: {
           created_at: string
@@ -501,6 +539,14 @@ export const Constants = {
 //   code: text (not null)
 //   expires_at: timestamp with time zone (not null)
 //   created_at: timestamp with time zone (not null, default: now())
+// Table: payments
+//   id: uuid (not null, default: gen_random_uuid())
+//   professional_id: uuid (nullable)
+//   amount: numeric (not null)
+//   payment_method: text (not null)
+//   notes: text (nullable)
+//   status: text (nullable, default: 'completed'::text)
+//   created_at: timestamp with time zone (nullable, default: now())
 // Table: plans
 //   id: uuid (not null, default: gen_random_uuid())
 //   name: text (not null)
@@ -548,6 +594,9 @@ export const Constants = {
 //   PRIMARY KEY neighborhoods_pkey: PRIMARY KEY (id)
 // Table: otps
 //   PRIMARY KEY otps_pkey: PRIMARY KEY (id)
+// Table: payments
+//   PRIMARY KEY payments_pkey: PRIMARY KEY (id)
+//   FOREIGN KEY payments_professional_id_fkey: FOREIGN KEY (professional_id) REFERENCES professionals(id) ON DELETE CASCADE
 // Table: plans
 //   PRIMARY KEY plans_pkey: PRIMARY KEY (id)
 // Table: professionals
@@ -583,6 +632,10 @@ export const Constants = {
 //     WITH CHECK: true
 // Table: otps
 //   Policy "OTPs are accessible by everyone" (ALL, PERMISSIVE) roles={public}
+//     USING: true
+//     WITH CHECK: true
+// Table: payments
+//   Policy "Payments are accessible by everyone" (ALL, PERMISSIVE) roles={public}
 //     USING: true
 //     WITH CHECK: true
 // Table: plans

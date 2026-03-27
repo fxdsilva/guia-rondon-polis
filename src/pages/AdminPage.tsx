@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { AdminProfessionalsTab } from '@/components/admin/AdminProfessionalsTab'
 import { AdminCategoriesTab } from '@/components/admin/AdminCategoriesTab'
 import { AdminAdsTab } from '@/components/admin/AdminAdsTab'
+import { AdminReportsTab } from '@/components/admin/AdminReportsTab'
 
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -73,7 +74,7 @@ const AdminPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-secondary">Painel Administrativo</h1>
           <p className="text-muted-foreground">
-            Gerencie profissionais, categorias e patrocinadores do guia.
+            Gerencie profissionais, categorias, anúncios e relatórios.
           </p>
         </div>
         <Button variant="outline" onClick={() => setIsAuthenticated(false)}>
@@ -82,10 +83,11 @@ const AdminPage = () => {
       </div>
 
       <Tabs defaultValue="profissionais" className="w-full">
-        <TabsList className="mb-6 grid w-full max-w-2xl grid-cols-3">
+        <TabsList className="mb-6 grid w-full max-w-3xl grid-cols-4">
           <TabsTrigger value="profissionais">Profissionais</TabsTrigger>
           <TabsTrigger value="categorias">Categorias</TabsTrigger>
           <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
+          <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profissionais">
@@ -98,6 +100,10 @@ const AdminPage = () => {
 
         <TabsContent value="anuncios">
           <AdminAdsTab />
+        </TabsContent>
+
+        <TabsContent value="relatorios">
+          <AdminReportsTab />
         </TabsContent>
       </Tabs>
     </div>

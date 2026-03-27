@@ -57,6 +57,8 @@ export type Professional = {
   working_hours: string
   premium_highlight?: 'top1' | 'recommended' | null
   subscription_status?: 'active' | 'expired' | null
+  created_at?: string
+  whatsapp_clicks?: number
 }
 
 export type Ad = {
@@ -627,6 +629,8 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     working_hours: 'Seg-Sexta: 08h às 18h | Sábado: 08h às 12h',
     premium_highlight: 'top1',
     subscription_status: 'active',
+    created_at: '2023-01-15T10:00:00Z',
+    whatsapp_clicks: 124,
   },
   {
     id: 'd0000000-0000-4000-8000-000000000002',
@@ -646,6 +650,8 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     working_hours: 'Seg-Sábado: 07h às 17h',
     premium_highlight: 'recommended',
     subscription_status: 'active',
+    created_at: '2023-05-20T14:30:00Z',
+    whatsapp_clicks: 89,
   },
   {
     id: 'd0000000-0000-4000-8000-000000000003',
@@ -664,6 +670,8 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     ],
     working_hours: 'Atendimento 24h Emergencial',
     subscription_status: 'expired',
+    created_at: '2023-11-05T09:15:00Z',
+    whatsapp_clicks: 42,
   },
   {
     id: 'd0000000-0000-4000-8000-000000000004',
@@ -682,6 +690,8 @@ export const MOCK_PROFESSIONALS: Professional[] = [
     ],
     working_hours: 'Seg-Sexta: 08h às 17h',
     subscription_status: 'active',
+    created_at: '2024-01-10T08:00:00Z',
+    whatsapp_clicks: 67,
   },
   {
     id: 'd0000000-0000-4000-8000-000000000005',
@@ -700,6 +710,8 @@ export const MOCK_PROFESSIONALS: Professional[] = [
       'https://img.usecurling.com/p/400/300?q=motherboard',
     ],
     working_hours: 'Seg-Sexta: 09h às 18h',
+    created_at: '2024-02-18T16:45:00Z',
+    whatsapp_clicks: 31,
   },
 ]
 

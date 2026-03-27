@@ -3,7 +3,7 @@ import { Star, MapPin, BadgeCheck, MessageCircle, Trophy, ThumbsUp } from 'lucid
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PopulatedProfessional } from '@/stores/main'
+import useMainStore, { PopulatedProfessional } from '@/stores/main'
 import { PLAN_PREMIUM_ID } from '@/stores/mockData'
 
 interface Props {
@@ -11,10 +11,12 @@ interface Props {
 }
 
 export function ProfessionalCard({ pro }: Props) {
+  const { incrementWhatsAppClick } = useMainStore()
   const isPremium = pro.plan_id === PLAN_PREMIUM_ID
 
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault()
+    incrementWhatsAppClick(pro.id)
     const msg = encodeURIComponent(
       'Olá, vi seu perfil no Guia Rondonópolis e gostaria de um orçamento.',
     )

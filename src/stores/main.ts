@@ -35,6 +35,8 @@ export type PopulatedProfessional = Professional & {
   reviews: Review[]
   rating: number
   reviewsCount: number
+  totalPaid: number
+  whatsapp_clicks: number
 }
 
 type MainStoreContextType = {
@@ -70,6 +72,7 @@ type MainStoreContextType = {
     professionalId: string,
     data: { amount: number; method: string; notes?: string },
   ) => Promise<void>
+  incrementWhatsAppClick: (id: string) => Promise<void>
 }
 
 const MainStoreContext = createContext<MainStoreContextType | undefined>(undefined)
@@ -82,6 +85,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
   const [services, setServices] = useState<Service[]>(MOCK_SERVICES)
   const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS)
   const [ads, setAds] = useState<Ad[]>(MOCK_ADS)
+  const [payments, setPayments] = useState<any[]>([])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -168,7 +172,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
           )
         }
 
-        const [dbP, dbS, dbR, dbA, dbC, dbN, dbPl] = await Promise.all([
+        const [dbP, dbS, dbR, dbA, dbC, dbN, dbPl, dbPay] = await Promise.all([
           supabase
             .from('professionals' as any)
             .select('*')
@@ -182,6 +186,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
           supabase.from('categories' as any).select('*'),
           supabase.from('neighborhoods' as any).select('*'),
           supabase.from('plans' as any).select('*'),
+          supabase.from('payments' as any).select('*'),
         ])
 
         if (dbC.data && dbC.data.length > 0)
@@ -191,6 +196,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         if (dbP.data && dbP.data.length > 0) setProfessionals(dbP.data)
         if (dbS.data && dbS.data.length > 0) setServices(dbS.data)
         if (dbR.data && dbR.data.length > 0) setReviews(dbR.data)
+        if (dbPay.data && dbPay.data.length > 0) setPayments(dbPay.data)
         if (dbA.data && dbA.data.length > 0)
           setAds(
             dbA.data.map((a: any) => ({
@@ -221,10 +227,12 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     return professionals.map((pro) => {
       const proServices = services.filter((s) => s.professional_id === pro.id)
       const proReviews = reviews.filter((r) => r.professional_id === pro.id)
+      const proPayments = payments.filter((p) => p.professional_id === pro.id)
       const rating =
         proReviews.length > 0
           ? proReviews.reduce((sum, r) => sum + r.rating, 0) / proReviews.length
           : 0
+      const totalPaid = proPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
 
       return {
         ...pro,
@@ -235,9 +243,11 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         reviews: proReviews,
         rating,
         reviewsCount: proReviews.length,
+        totalPaid,
+        whatsapp_clicks: pro.whatsapp_clicks || 0,
       }
     })
-  }, [professionals, services, reviews, categories, neighborhoods, plans])
+  }, [professionals, services, reviews, categories, neighborhoods, plans, payments])
 
   const togglePremium = async (id: string) => {
     const pro = professionals.find((p) => p.id === id)
@@ -264,6 +274,24 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
       await supabase
         .from('professionals' as any)
         .update({ verified: !pro.verified })
+        .eq('id', id)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const incrementWhatsAppClick = async (id: string) => {
+    const pro = professionals.find((p) => p.id === id)
+    if (!pro) return
+
+    const newClicks = (pro.whatsapp_clicks || 0) + 1
+    setProfessionals((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, whatsapp_clicks: newClicks } : p)),
+    )
+    try {
+      await supabase
+        .from('professionals' as any)
+        .update({ whatsapp_clicks: newClicks })
         .eq('id', id)
     } catch (e) {
       console.error(e)
@@ -523,14 +551,22 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     data: { amount: number; method: string; notes?: string },
   ) => {
     try {
-      await supabase.from('payments' as any).insert([
-        {
-          professional_id: professionalId,
-          amount: data.amount,
-          payment_method: data.method,
-          notes: data.notes,
-        },
-      ])
+      const { data: newPayment } = await supabase
+        .from('payments' as any)
+        .insert([
+          {
+            professional_id: professionalId,
+            amount: data.amount,
+            payment_method: data.method,
+            notes: data.notes,
+          },
+        ])
+        .select()
+        .single()
+
+      if (newPayment) {
+        setPayments((prev) => [...prev, newPayment])
+      }
 
       const updates = {
         plan_id: PLAN_PREMIUM_ID,
@@ -580,6 +616,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         verifyOtp,
         deleteReview,
         registerPayment,
+        incrementWhatsAppClick,
       },
     },
     children,
