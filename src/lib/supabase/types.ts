@@ -225,6 +225,7 @@ export type Database = {
           premium_highlight: string | null
           subscription_status: string | null
           verified: boolean
+          whatsapp_clicks: number
           working_hours: string
         }
         Insert: {
@@ -245,6 +246,7 @@ export type Database = {
           premium_highlight?: string | null
           subscription_status?: string | null
           verified?: boolean
+          whatsapp_clicks?: number
           working_hours: string
         }
         Update: {
@@ -265,6 +267,7 @@ export type Database = {
           premium_highlight?: string | null
           subscription_status?: string | null
           verified?: boolean
+          whatsapp_clicks?: number
           working_hours?: string
         }
         Relationships: [
@@ -572,6 +575,7 @@ export const Constants = {
 //   premium_highlight: text (nullable)
 //   subscription_status: text (nullable)
 //   created_at: timestamp with time zone (not null, default: now())
+//   whatsapp_clicks: integer (not null, default: 0)
 // Table: reviews
 //   id: uuid (not null, default: gen_random_uuid())
 //   professional_id: uuid (nullable)

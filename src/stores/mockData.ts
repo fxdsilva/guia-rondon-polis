@@ -76,6 +76,33 @@ export type Ad = {
   isGeneral?: boolean
 }
 
+export type Client = {
+  id: string
+  name: string
+  phone: string
+  email?: string
+  created_at: string
+}
+
+export type Quote = {
+  id: string
+  client_id: string
+  professional_id: string
+  description: string
+  status: 'pending' | 'accepted' | 'rejected' | 'completed'
+  price?: number
+  created_at: string
+}
+
+export type Invoice = {
+  id: string
+  payment_id?: string
+  quote_id?: string
+  url?: string
+  status: string
+  created_at: string
+}
+
 export const PLAN_FREE_ID = 'b0000000-0000-4000-8000-000000000001'
 export const PLAN_PREMIUM_ID = 'b0000000-0000-4000-8000-000000000002'
 export const PLAN_PENDING_ID = 'b0000000-0000-4000-8000-000000000003'
@@ -96,6 +123,23 @@ export const MOCK_PLANS: Plan[] = [
   },
   { id: PLAN_PENDING_ID, name: 'Pendente', price: 0, features: ['Aguardando aprovação'] },
 ]
+
+export const MOCK_CLIENTS: Client[] = [
+  { id: 'cli-1', name: 'João Silva', phone: '5566999991111', created_at: new Date().toISOString() },
+]
+
+export const MOCK_QUOTES: Quote[] = [
+  {
+    id: 'q-1',
+    client_id: 'cli-1',
+    professional_id: 'd0000000-0000-4000-8000-000000000001',
+    description: 'Troca de fiação da sala e instalação de novas tomadas.',
+    status: 'pending',
+    created_at: new Date().toISOString(),
+  },
+]
+
+export const MOCK_INVOICES: Invoice[] = []
 
 export const MOCK_CATEGORIES: Category[] = [
   // 🏠 Casa e Construção

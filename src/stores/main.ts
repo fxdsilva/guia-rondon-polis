@@ -15,6 +15,9 @@ import {
   MOCK_SERVICES,
   MOCK_REVIEWS,
   MOCK_ADS,
+  MOCK_CLIENTS,
+  MOCK_QUOTES,
+  MOCK_INVOICES,
   Plan,
   Category,
   Neighborhood,
@@ -22,6 +25,9 @@ import {
   Service,
   Review,
   Ad,
+  Client,
+  Quote,
+  Invoice,
   PLAN_FREE_ID,
   PLAN_PREMIUM_ID,
 } from './mockData'
@@ -47,6 +53,9 @@ type MainStoreContextType = {
   services: Service[]
   reviews: Review[]
   ads: Ad[]
+  clients: Client[]
+  quotes: Quote[]
+  invoices: Invoice[]
   populatedProfessionals: PopulatedProfessional[]
   currentUserId: string | null
   isLoading: boolean
@@ -73,6 +82,9 @@ type MainStoreContextType = {
     data: { amount: number; method: string; notes?: string },
   ) => Promise<void>
   incrementWhatsAppClick: (id: string) => Promise<void>
+  addClient: (data: Partial<Client>) => Promise<Client>
+  addQuote: (data: Partial<Quote>) => Promise<Quote>
+  updateQuote: (id: string, data: Partial<Quote>) => Promise<void>
 }
 
 const MainStoreContext = createContext<MainStoreContextType | undefined>(undefined)
@@ -86,6 +98,9 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
   const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS)
   const [ads, setAds] = useState<Ad[]>(MOCK_ADS)
   const [payments, setPayments] = useState<any[]>([])
+  const [clients, setClients] = useState<Client[]>(MOCK_CLIENTS)
+  const [quotes, setQuotes] = useState<Quote[]>(MOCK_QUOTES)
+  const [invoices, setInvoices] = useState<Invoice[]>(MOCK_INVOICES)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -149,30 +164,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
           await supabase.from('reviews' as any).insert(MOCK_REVIEWS)
         }
 
-        const adRes = await supabase
-          .from('advertisements' as any)
-          .select('id')
-          .limit(1)
-        if (!adRes.error && adRes.data && adRes.data.length === 0) {
-          await supabase.from('advertisements' as any).insert(
-            MOCK_ADS.map((a) => ({
-              id: a.id,
-              company_name: a.companyName,
-              description: a.description,
-              image_url: a.imageUrl,
-              link: a.link,
-              target_categories: a.targetCategories,
-              active: a.active,
-              phone: a.phone,
-              website: a.website,
-              facebook: a.facebook,
-              instagram: a.instagram,
-              is_general: a.isGeneral,
-            })),
-          )
-        }
-
-        const [dbP, dbS, dbR, dbA, dbC, dbN, dbPl, dbPay] = await Promise.all([
+        const [dbP, dbS, dbR, dbA, dbC, dbN, dbPl, dbPay, dbCli, dbQu, dbInv] = await Promise.all([
           supabase
             .from('professionals' as any)
             .select('*')
@@ -187,6 +179,12 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
           supabase.from('neighborhoods' as any).select('*'),
           supabase.from('plans' as any).select('*'),
           supabase.from('payments' as any).select('*'),
+          supabase.from('clients' as any).select('*'),
+          supabase
+            .from('quotes' as any)
+            .select('*')
+            .order('created_at', { ascending: false }),
+          supabase.from('invoices' as any).select('*'),
         ])
 
         if (dbC.data && dbC.data.length > 0)
@@ -197,6 +195,10 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         if (dbS.data && dbS.data.length > 0) setServices(dbS.data)
         if (dbR.data && dbR.data.length > 0) setReviews(dbR.data)
         if (dbPay.data && dbPay.data.length > 0) setPayments(dbPay.data)
+        if (dbCli.data && dbCli.data.length > 0) setClients(dbCli.data)
+        if (dbQu.data && dbQu.data.length > 0) setQuotes(dbQu.data)
+        if (dbInv.data && dbInv.data.length > 0) setInvoices(dbInv.data)
+
         if (dbA.data && dbA.data.length > 0)
           setAds(
             dbA.data.map((a: any) => ({
@@ -298,6 +300,71 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const addClient = async (data: Partial<Client>): Promise<Client> => {
+    try {
+      const { data: existingClient } = await supabase
+        .from('clients' as any)
+        .select('*')
+        .eq('phone', data.phone)
+        .maybeSingle()
+      if (existingClient) return existingClient as Client
+
+      const { data: dbClient, error } = await supabase
+        .from('clients' as any)
+        .insert([data])
+        .select()
+        .single()
+      if (!error && dbClient) {
+        setClients((prev) => [...prev, dbClient as Client])
+        return dbClient as Client
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    const fallback = {
+      ...data,
+      id: `cli-${Date.now()}`,
+      created_at: new Date().toISOString(),
+    } as Client
+    setClients((prev) => [...prev, fallback])
+    return fallback
+  }
+
+  const addQuote = async (data: Partial<Quote>): Promise<Quote> => {
+    try {
+      const { data: dbQuote, error } = await supabase
+        .from('quotes' as any)
+        .insert([data])
+        .select()
+        .single()
+      if (!error && dbQuote) {
+        setQuotes((prev) => [dbQuote as Quote, ...prev])
+        return dbQuote as Quote
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    const fallback = {
+      ...data,
+      id: `q-${Date.now()}`,
+      created_at: new Date().toISOString(),
+    } as Quote
+    setQuotes((prev) => [fallback, ...prev])
+    return fallback
+  }
+
+  const updateQuote = async (id: string, data: Partial<Quote>) => {
+    setQuotes((prev) => prev.map((q) => (q.id === id ? { ...q, ...data } : q)))
+    try {
+      await supabase
+        .from('quotes' as any)
+        .update(data)
+        .eq('id', id)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   const addProfessional = async (
     pro: Omit<Professional, 'id' | 'created_at'>,
     servicesList: string[],
@@ -308,12 +375,9 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         .insert([pro])
         .select()
         .single()
-
       if (error) throw error
-
       const proId = newPro?.id || `mock_id_${Date.now()}`
       const finalPro = newPro || { ...pro, id: proId }
-
       setProfessionals((prev) => [finalPro as Professional, ...prev])
 
       if (servicesList.length > 0) {
@@ -322,7 +386,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
           .from('services' as any)
           .insert(newServices)
           .select()
-
         if (srvData && srvData.length > 0) {
           setServices((prev) => [...(srvData as Service[]), ...prev])
         } else {
@@ -370,7 +433,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         .insert([{ ...cat, group_emoji: cat.groupEmoji }])
         .select()
         .single()
-
       if (error) throw error
       const newCat = data
         ? { ...data, groupEmoji: data.group_emoji }
@@ -430,7 +492,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         ])
         .select()
         .single()
-
       if (error) throw error
       const newAd = data ? { ...ad, id: data.id } : { ...ad, id: `ad_${Date.now()}` }
       setAds((prev) => [newAd as Ad, ...prev])
@@ -478,10 +539,8 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         .maybeSingle()
       const proId = pro?.id || professionals.find((p) => p.phone === phone)?.id
       if (!proId) return null
-
       const code = Math.floor(100000 + Math.random() * 900000).toString()
       const expiresAt = new Date(Date.now() + 10 * 60000).toISOString()
-
       supabase
         .from('otps' as any)
         .delete()
@@ -491,7 +550,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         .from('otps' as any)
         .insert([{ phone, code, expires_at: expiresAt }])
         .then()
-
       return code
     } catch (e) {
       console.error(e)
@@ -510,7 +568,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         .eq('code', code)
         .gte('expires_at', new Date().toISOString())
         .maybeSingle()
-
       if (data && !error) {
         const { data: pro } = await supabase
           .from('professionals' as any)
@@ -524,7 +581,6 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
           .then()
         return pro?.id || professionals.find((p) => p.phone === phone)?.id || null
       }
-
       if (code === '123456') return professionals.find((p) => p.phone === phone)?.id || null
       return null
     } catch (e) {
@@ -563,20 +619,13 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         ])
         .select()
         .single()
-
       if (newPayment) {
         setPayments((prev) => [...prev, newPayment])
       }
-
-      const updates = {
-        plan_id: PLAN_PREMIUM_ID,
-        subscription_status: 'active',
-      }
-
+      const updates = { plan_id: PLAN_PREMIUM_ID, subscription_status: 'active' }
       setProfessionals((prev) =>
         prev.map((p) => (p.id === professionalId ? { ...p, ...updates } : p)),
       )
-
       await supabase
         .from('professionals' as any)
         .update(updates)
@@ -597,6 +646,9 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         services,
         reviews,
         ads,
+        clients,
+        quotes,
+        invoices,
         populatedProfessionals,
         currentUserId,
         isLoading,
@@ -617,6 +669,9 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         deleteReview,
         registerPayment,
         incrementWhatsAppClick,
+        addClient,
+        addQuote,
+        updateQuote,
       },
     },
     children,

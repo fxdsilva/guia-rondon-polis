@@ -6,6 +6,8 @@ import { AdminProfessionalsTab } from '@/components/admin/AdminProfessionalsTab'
 import { AdminCategoriesTab } from '@/components/admin/AdminCategoriesTab'
 import { AdminAdsTab } from '@/components/admin/AdminAdsTab'
 import { AdminReportsTab } from '@/components/admin/AdminReportsTab'
+import { AdminUsersTab } from '@/components/admin/AdminUsersTab'
+import { AdminQuotesTab } from '@/components/admin/AdminQuotesTab'
 
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -31,8 +33,8 @@ const AdminPage = () => {
           className="max-w-sm w-full bg-white p-8 rounded-2xl shadow-sm border space-y-6"
         >
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-secondary mb-2">Login Admin</h1>
-            <p className="text-sm text-muted-foreground">Acesso restrito</p>
+            <h1 className="text-2xl font-bold text-secondary mb-2">Acesso Admin</h1>
+            <p className="text-sm text-muted-foreground">Sistema de Gestão SaaS</p>
           </div>
           {error && (
             <p className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded font-medium">
@@ -60,8 +62,8 @@ const AdminPage = () => {
               />
             </div>
           </div>
-          <Button type="submit" className="w-full">
-            Entrar
+          <Button type="submit" className="w-full h-12 text-base">
+            Acessar Painel
           </Button>
         </form>
       </div>
@@ -69,41 +71,76 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 animate-fade-in">
+    <div className="container mx-auto px-4 py-12 animate-fade-in max-w-6xl">
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
         <div>
           <h1 className="text-3xl font-bold text-secondary">Painel Administrativo</h1>
           <p className="text-muted-foreground">
-            Gerencie profissionais, categorias, anúncios e relatórios.
+            Gestão completa de assinantes, clientes e métricas financeiras.
           </p>
         </div>
-        <Button variant="outline" onClick={() => setIsAuthenticated(false)}>
-          Sair
+        <Button variant="outline" onClick={() => setIsAuthenticated(false)} className="bg-white">
+          Sair do Sistema
         </Button>
       </div>
 
       <Tabs defaultValue="profissionais" className="w-full">
-        <TabsList className="mb-6 grid w-full max-w-3xl grid-cols-4">
-          <TabsTrigger value="profissionais">Profissionais</TabsTrigger>
-          <TabsTrigger value="categorias">Categorias</TabsTrigger>
-          <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
-          <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
+        <TabsList className="mb-8 flex flex-wrap gap-2 h-auto bg-transparent justify-start">
+          <TabsTrigger
+            value="profissionais"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-white px-6 h-10 shadow-sm"
+          >
+            Prestadores / Assinantes
+          </TabsTrigger>
+          <TabsTrigger
+            value="clientes"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-white px-6 h-10 shadow-sm"
+          >
+            Clientes / Usuários
+          </TabsTrigger>
+          <TabsTrigger
+            value="orcamentos"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-white px-6 h-10 shadow-sm"
+          >
+            Orçamentos / Serviços
+          </TabsTrigger>
+          <TabsTrigger
+            value="relatorios"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-white px-6 h-10 shadow-sm"
+          >
+            Métricas e Financeiro
+          </TabsTrigger>
+          <TabsTrigger
+            value="categorias"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-white px-6 h-10 shadow-sm"
+          >
+            Categorias
+          </TabsTrigger>
+          <TabsTrigger
+            value="anuncios"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border bg-white px-6 h-10 shadow-sm"
+          >
+            Empresas Parceiras
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profissionais">
           <AdminProfessionalsTab />
         </TabsContent>
-
+        <TabsContent value="clientes">
+          <AdminUsersTab />
+        </TabsContent>
+        <TabsContent value="orcamentos">
+          <AdminQuotesTab />
+        </TabsContent>
+        <TabsContent value="relatorios">
+          <AdminReportsTab />
+        </TabsContent>
         <TabsContent value="categorias">
           <AdminCategoriesTab />
         </TabsContent>
-
         <TabsContent value="anuncios">
           <AdminAdsTab />
-        </TabsContent>
-
-        <TabsContent value="relatorios">
-          <AdminReportsTab />
         </TabsContent>
       </Tabs>
     </div>

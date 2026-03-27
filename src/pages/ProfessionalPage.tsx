@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   Edit3,
@@ -14,6 +14,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import { ContextualAds } from '@/components/ContextualAds'
 import useMainStore from '@/stores/main'
 import { PLAN_PREMIUM_ID } from '@/stores/mockData'
@@ -21,7 +25,18 @@ import NotFound from './NotFound'
 
 const ProfessionalPage = () => {
   const { id } = useParams()
-  const { populatedProfessionals, currentUserId, isLoading } = useMainStore()
+  const {
+    populatedProfessionals,
+    currentUserId,
+    isLoading,
+    addClient,
+    addQuote,
+    incrementWhatsAppClick,
+  } = useMainStore()
+
+  const [isQuoteOpen, setIsQuoteOpen] = useState(false)
+  const [quoteForm, setQuoteForm] = useState({ name: '', phone: '', description: '' })
+  const [isSubmittingQuote, setIsSubmittingQuote] = useState(false)
 
   const pro = useMemo(
     () => populatedProfessionals.find((p) => String(p.id) === String(id)),
@@ -30,19 +45,13 @@ const ProfessionalPage = () => {
 
   const displayServices = useMemo(() => {
     if (!pro?.services) return []
-
     let rawServices: any[] = []
-    if (typeof pro.services === 'string') {
-      rawServices = [pro.services]
-    } else if (Array.isArray(pro.services)) {
-      rawServices = pro.services
-    }
+    if (typeof pro.services === 'string') rawServices = [pro.services]
+    else if (Array.isArray(pro.services)) rawServices = pro.services
 
     const extractedNames = rawServices.map((s) => {
       if (typeof s === 'string') return s
-      if (s && typeof s === 'object') {
-        return s.name || s.title || ''
-      }
+      if (s && typeof s === 'object') return s.name || s.title || ''
       return ''
     })
 
@@ -67,11 +76,42 @@ const ProfessionalPage = () => {
 
   const isPremium = pro.plan?.id === PLAN_PREMIUM_ID
 
-  const handleWhatsApp = () => {
+  const handleQuoteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmittingQuote(true)
+
+    let clientId = ''
+    try {
+      const client = await addClient({
+        name: quoteForm.name,
+        phone: quoteForm.phone.replace(/\D/g, ''),
+      })
+      clientId = client?.id || `cli-${Date.now()}`
+    } catch (err) {
+      clientId = `cli-${Date.now()}`
+    }
+
+    await addQuote({
+      client_id: clientId,
+      professional_id: pro.id,
+      description: quoteForm.description,
+      status: 'pending',
+    })
+
+    await incrementWhatsAppClick(pro.id)
+
     const msg = encodeURIComponent(
-      `Olá ${pro.name}, vi seu perfil no Guia Rondonópolis e gostaria de um orçamento.`,
+      `Olá ${pro.name}, meu nome é ${quoteForm.name}. Vi seu perfil no Guia Rondonópolis.\n\nPreciso do seguinte serviço: ${quoteForm.description}`,
     )
-    window.open(`https://wa.me/${pro.phone}?text=${msg}`, '_blank', 'noopener,noreferrer')
+    window.open(
+      `https://wa.me/55${pro.phone.replace(/\D/g, '')}?text=${msg}`,
+      '_blank',
+      'noopener,noreferrer',
+    )
+
+    setIsSubmittingQuote(false)
+    setIsQuoteOpen(false)
+    setQuoteForm({ name: '', phone: '', description: '' })
   }
 
   return (
@@ -82,7 +122,7 @@ const ProfessionalPage = () => {
           <Button asChild size="sm" className="shadow-sm font-semibold h-8">
             <Link to="/editar-perfil">
               <Edit3 className="w-4 h-4 mr-2" />
-              Editar Perfil
+              Acessar Dashboard
             </Link>
           </Button>
         </div>
@@ -150,7 +190,7 @@ const ProfessionalPage = () => {
               <Button
                 size="lg"
                 className="gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white text-lg px-8 h-14 rounded-xl shadow-lg transition-transform hover:scale-105"
-                onClick={handleWhatsApp}
+                onClick={() => setIsQuoteOpen(true)}
               >
                 <MessageCircle className="w-6 h-6" /> Solicitar Orçamento
               </Button>
@@ -162,7 +202,7 @@ const ProfessionalPage = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <Tabs defaultValue="sobre" className="w-full">
-            <TabsList className="w-full justify-start h-12 bg-transparent border-b rounded-none mb-8 p-0">
+            <TabsList className="w-full justify-start h-12 bg-transparent border-b rounded-none mb-8 p-0 overflow-x-auto overflow-y-hidden">
               <TabsTrigger
                 value="sobre"
                 className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 h-12 text-base"
@@ -284,11 +324,65 @@ const ProfessionalPage = () => {
       <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-40">
         <Button
           className="w-full gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white h-12 text-lg rounded-xl shadow-lg"
-          onClick={handleWhatsApp}
+          onClick={() => setIsQuoteOpen(true)}
         >
           <MessageCircle className="w-6 h-6" /> Falar no WhatsApp
         </Button>
       </div>
+
+      <Dialog open={isQuoteOpen} onOpenChange={setIsQuoteOpen}>
+        <DialogContent className="sm:max-w-md border-none shadow-2xl">
+          <DialogHeader className="mb-2">
+            <DialogTitle className="text-2xl font-bold text-secondary">
+              Solicitar Orçamento
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Preencha rapidamente para enviar sua solicitação direto no WhatsApp do profissional.
+            </p>
+          </DialogHeader>
+          <form onSubmit={handleQuoteSubmit} className="space-y-5 pt-2">
+            <div className="space-y-2">
+              <Label>Seu Nome Completo</Label>
+              <Input
+                required
+                value={quoteForm.name}
+                onChange={(e) => setQuoteForm({ ...quoteForm, name: e.target.value })}
+                placeholder="Como o profissional deve te chamar?"
+                className="bg-slate-50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Seu WhatsApp</Label>
+              <Input
+                required
+                type="tel"
+                value={quoteForm.phone}
+                onChange={(e) => setQuoteForm({ ...quoteForm, phone: e.target.value })}
+                placeholder="(66) 99999-9999"
+                className="bg-slate-50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Detalhes do Serviço / Orçamento</Label>
+              <Textarea
+                required
+                value={quoteForm.description}
+                onChange={(e) => setQuoteForm({ ...quoteForm, description: e.target.value })}
+                placeholder="Descreva o que você precisa detalhadamente..."
+                className="h-28 bg-slate-50"
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={isSubmittingQuote}
+              className="w-full h-14 text-lg font-bold gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white mt-4 shadow-lg transition-all hover:scale-[1.02]"
+            >
+              <MessageCircle className="w-6 h-6" />{' '}
+              {isSubmittingQuote ? 'Redirecionando...' : 'Enviar pelo WhatsApp'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
