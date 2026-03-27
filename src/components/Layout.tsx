@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Menu, MessageCircle, MapPin, ChevronDown, Megaphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -18,10 +19,28 @@ const getSlug = (str: string) => str.toLowerCase().replace(/\s+/g, '-')
 export default function Layout() {
   const location = useLocation()
   const { currentUserId } = useMainStore()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [location.pathname])
+
+  const handleHomeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (location.pathname === '/') {
+      e.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+    setIsMobileMenuOpen(false)
+  }
 
   const NavLinks = () => (
     <>
-      <Link to="/" className="text-sm font-medium hover:text-primary transition-colors py-2">
+      <Link
+        to="/"
+        onClick={handleHomeClick}
+        className="text-sm font-medium hover:text-primary transition-colors py-2"
+      >
         Início
       </Link>
 
@@ -61,7 +80,7 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b shadow-sm">
         <div className="container mx-auto px-4 h-16 items-center justify-between inline-flex">
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" onClick={handleHomeClick} className="flex items-center gap-2 group">
             <MapPin className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
             <span className="font-bold text-xl text-secondary">Guia Rondonópolis</span>
           </Link>
@@ -91,7 +110,7 @@ export default function Layout() {
             </div>
           </nav>
 
-          <Sheet>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
                 <Menu className="w-6 h-6" />
@@ -110,17 +129,25 @@ export default function Layout() {
                 <div className="w-full mt-6 pt-6 border-t flex flex-col gap-4">
                   <Link
                     to="/anunciar-empresa"
+                    onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center justify-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors w-full py-2.5 border rounded-md"
                   >
                     <Megaphone className="w-4 h-4" /> Divulgue sua Marca
                   </Link>
                   {!currentUserId ? (
                     <Button asChild className="w-full font-semibold">
-                      <Link to="/cadastrar">Anuncie seu Serviço</Link>
+                      <Link to="/cadastrar" onClick={() => setIsMobileMenuOpen(false)}>
+                        Anuncie seu Serviço
+                      </Link>
                     </Button>
                   ) : (
                     <Button asChild variant="outline" className="w-full font-semibold">
-                      <Link to={`/profissional/${currentUserId}`}>Meu Perfil</Link>
+                      <Link
+                        to={`/profissional/${currentUserId}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Meu Perfil
+                      </Link>
                     </Button>
                   )}
                 </div>
@@ -192,7 +219,9 @@ export default function Layout() {
           asChild
           size="lg"
           className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-6 md:translate-x-0 z-50 rounded-full shadow-elevation h-14 px-6 text-sm md:text-base font-bold bg-primary hover:bg-primary/90 text-white animate-fade-in-up hover:scale-105 transition-all flex items-center"
-        ></Button>
+        >
+          <Link to="/cadastrar">Anuncie seu Serviço</Link>
+        </Button>
       )}
 
       <a

@@ -93,6 +93,72 @@ export type Database = {
         }
         Relationships: []
       }
+      clients: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          phone: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          created_at: string | null
+          id: string
+          payment_id: string | null
+          quote_id: string | null
+          status: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          payment_id?: string | null
+          quote_id?: string | null
+          status?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          payment_id?: string | null
+          quote_id?: string | null
+          status?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'invoices_payment_id_fkey'
+            columns: ['payment_id']
+            isOneToOne: false
+            referencedRelation: 'payments'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'invoices_quote_id_fkey'
+            columns: ['quote_id']
+            isOneToOne: false
+            referencedRelation: 'quotes'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       neighborhoods: {
         Row: {
           created_at: string
@@ -290,6 +356,51 @@ export type Database = {
             columns: ['plan_id']
             isOneToOne: false
             referencedRelation: 'plans'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          description: string
+          id: string
+          price: number | null
+          professional_id: string | null
+          status: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          price?: number | null
+          professional_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          price?: number | null
+          professional_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'quotes_client_id_fkey'
+            columns: ['client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'quotes_professional_id_fkey'
+            columns: ['professional_id']
+            isOneToOne: false
+            referencedRelation: 'professionals'
             referencedColumns: ['id']
           },
         ]
@@ -529,6 +640,19 @@ export const Constants = {
 //   icon: text (nullable)
 //   suggested_services: _text (nullable)
 //   created_at: timestamp with time zone (not null, default: now())
+// Table: clients
+//   id: uuid (not null, default: gen_random_uuid())
+//   name: text (not null)
+//   phone: text (not null)
+//   email: text (nullable)
+//   created_at: timestamp with time zone (nullable, default: now())
+// Table: invoices
+//   id: uuid (not null, default: gen_random_uuid())
+//   payment_id: uuid (nullable)
+//   quote_id: uuid (nullable)
+//   url: text (nullable)
+//   status: text (nullable, default: 'issued'::text)
+//   created_at: timestamp with time zone (nullable, default: now())
 // Table: neighborhoods
 //   id: uuid (not null, default: gen_random_uuid())
 //   name: text (not null)
@@ -576,6 +700,14 @@ export const Constants = {
 //   subscription_status: text (nullable)
 //   created_at: timestamp with time zone (not null, default: now())
 //   whatsapp_clicks: integer (not null, default: 0)
+// Table: quotes
+//   id: uuid (not null, default: gen_random_uuid())
+//   client_id: uuid (nullable)
+//   professional_id: uuid (nullable)
+//   description: text (not null)
+//   status: text (nullable, default: 'pending'::text)
+//   price: numeric (nullable)
+//   created_at: timestamp with time zone (nullable, default: now())
 // Table: reviews
 //   id: uuid (not null, default: gen_random_uuid())
 //   professional_id: uuid (nullable)
@@ -594,6 +726,13 @@ export const Constants = {
 //   PRIMARY KEY advertisements_pkey: PRIMARY KEY (id)
 // Table: categories
 //   PRIMARY KEY categories_pkey: PRIMARY KEY (id)
+// Table: clients
+//   UNIQUE clients_phone_key: UNIQUE (phone)
+//   PRIMARY KEY clients_pkey: PRIMARY KEY (id)
+// Table: invoices
+//   FOREIGN KEY invoices_payment_id_fkey: FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL
+//   PRIMARY KEY invoices_pkey: PRIMARY KEY (id)
+//   FOREIGN KEY invoices_quote_id_fkey: FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE SET NULL
 // Table: neighborhoods
 //   PRIMARY KEY neighborhoods_pkey: PRIMARY KEY (id)
 // Table: otps
@@ -608,6 +747,10 @@ export const Constants = {
 //   FOREIGN KEY professionals_neighborhood_id_fkey: FOREIGN KEY (neighborhood_id) REFERENCES neighborhoods(id) ON DELETE SET NULL
 //   PRIMARY KEY professionals_pkey: PRIMARY KEY (id)
 //   FOREIGN KEY professionals_plan_id_fkey: FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE SET NULL
+// Table: quotes
+//   FOREIGN KEY quotes_client_id_fkey: FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+//   PRIMARY KEY quotes_pkey: PRIMARY KEY (id)
+//   FOREIGN KEY quotes_professional_id_fkey: FOREIGN KEY (professional_id) REFERENCES professionals(id) ON DELETE CASCADE
 // Table: reviews
 //   PRIMARY KEY reviews_pkey: PRIMARY KEY (id)
 //   FOREIGN KEY reviews_professional_id_fkey: FOREIGN KEY (professional_id) REFERENCES professionals(id) ON DELETE CASCADE
@@ -630,6 +773,14 @@ export const Constants = {
 //   Policy "Categories are updatable by everyone" (UPDATE, PERMISSIVE) roles={public}
 //     USING: true
 //     WITH CHECK: true
+// Table: clients
+//   Policy "Clients are accessible by everyone" (ALL, PERMISSIVE) roles={public}
+//     USING: true
+//     WITH CHECK: true
+// Table: invoices
+//   Policy "Invoices are accessible by everyone" (ALL, PERMISSIVE) roles={public}
+//     USING: true
+//     WITH CHECK: true
 // Table: neighborhoods
 //   Policy "Neighborhoods are accessible by everyone" (ALL, PERMISSIVE) roles={public}
 //     USING: true
@@ -648,6 +799,10 @@ export const Constants = {
 //     WITH CHECK: true
 // Table: professionals
 //   Policy "Professionals are accessible by everyone" (ALL, PERMISSIVE) roles={public}
+//     USING: true
+//     WITH CHECK: true
+// Table: quotes
+//   Policy "Quotes are accessible by everyone" (ALL, PERMISSIVE) roles={public}
 //     USING: true
 //     WITH CHECK: true
 // Table: reviews
@@ -691,3 +846,7 @@ export const Constants = {
 //   END;
 //   $function$
 //
+
+// --- INDEXES ---
+// Table: clients
+//   CREATE UNIQUE INDEX clients_phone_key ON public.clients USING btree (phone)
