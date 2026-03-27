@@ -22,16 +22,33 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import useMainStore from '@/stores/main'
 import { useToast } from '@/hooks/use-toast'
 
 export function AdminProfessionalsTab() {
-  const { populatedProfessionals, reviews, updateProfessional, togglePremium, deleteReview } =
-    useMainStore()
+  const {
+    populatedProfessionals,
+    reviews,
+    updateProfessional,
+    togglePremium,
+    deleteReview,
+    registerPayment,
+  } = useMainStore()
   const { toast } = useToast()
   const [filter, setFilter] = useState<'all' | 'premium' | 'pending'>('all')
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingPro, setEditingPro] = useState<any>(null)
+
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false)
+  const [paymentForm, setPaymentForm] = useState({ amount: '50.00', method: 'pix', notes: '' })
 
   const [form, setForm] = useState({
     name: '',
@@ -80,12 +97,24 @@ export function AdminProfessionalsTab() {
     setIsSheetOpen(false)
   }
 
-  const handleRegisterPayment = () => {
+  const handleOpenPayment = () => {
+    setPaymentForm({ amount: '50.00', method: 'pix', notes: '' })
+    setIsPaymentOpen(true)
+  }
+
+  const handleConfirmPayment = async () => {
+    if (!editingPro) return
+    await registerPayment(editingPro.id, {
+      amount: parseFloat(paymentForm.amount) || 0,
+      method: paymentForm.method,
+      notes: paymentForm.notes,
+    })
     setForm({ ...form, subscription_status: 'active' })
-    if (editingPro) {
-      updateProfessional(editingPro.id, { subscription_status: 'active' })
-    }
-    toast({ title: 'Pagamento registrado e assinatura ativada!' })
+    setIsPaymentOpen(false)
+    toast({
+      title: 'Pagamento registrado!',
+      description: 'Assinatura renovada e ativada com sucesso.',
+    })
   }
 
   const proReviews = reviews.filter((r) => r.professional_id === editingPro?.id)
@@ -294,10 +323,10 @@ export function AdminProfessionalsTab() {
                 <Button
                   variant="outline"
                   className="w-full bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 border-green-200"
-                  onClick={handleRegisterPayment}
+                  onClick={handleOpenPayment}
                 >
                   <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Registrar Pagamento Mensal
+                  Registrar Pagamento Manual
                 </Button>
               </div>
 
@@ -389,6 +418,68 @@ export function AdminProfessionalsTab() {
           </Tabs>
         </SheetContent>
       </Sheet>
+
+      <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Registrar Pagamento Manual</DialogTitle>
+            <DialogDescription>
+              Insira os detalhes da transação para renovar a assinatura Premium de{' '}
+              {editingPro?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label htmlFor="amount" className="text-sm font-medium">
+                Valor Recebido (R$)
+              </label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                value={paymentForm.amount}
+                onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="method" className="text-sm font-medium">
+                Forma de Pagamento
+              </label>
+              <Select
+                value={paymentForm.method}
+                onValueChange={(v) => setPaymentForm({ ...paymentForm, method: v })}
+              >
+                <SelectTrigger id="method">
+                  <SelectValue placeholder="Selecione o método" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pix">PIX</SelectItem>
+                  <SelectItem value="transfer">Transferência Bancária</SelectItem>
+                  <SelectItem value="cash">Dinheiro em Espécie</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="notes" className="text-sm font-medium">
+                Observações / Código do Comprovante (Opcional)
+              </label>
+              <Textarea
+                id="notes"
+                placeholder="Ex: Pagamento recebido via PIX chave CPF..."
+                value={paymentForm.notes}
+                onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
+                className="h-20"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPaymentOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmPayment}>Confirmar Pagamento</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

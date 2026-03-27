@@ -66,6 +66,10 @@ type MainStoreContextType = {
   generateOtp: (phone: string) => Promise<string | null>
   verifyOtp: (phone: string, code: string) => Promise<string | null>
   deleteReview: (id: string) => Promise<void>
+  registerPayment: (
+    professionalId: string,
+    data: { amount: number; method: string; notes?: string },
+  ) => Promise<void>
 }
 
 const MainStoreContext = createContext<MainStoreContextType | undefined>(undefined)
@@ -514,6 +518,38 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const registerPayment = async (
+    professionalId: string,
+    data: { amount: number; method: string; notes?: string },
+  ) => {
+    try {
+      await supabase.from('payments' as any).insert([
+        {
+          professional_id: professionalId,
+          amount: data.amount,
+          payment_method: data.method,
+          notes: data.notes,
+        },
+      ])
+
+      const updates = {
+        plan_id: PLAN_PREMIUM_ID,
+        subscription_status: 'active',
+      }
+
+      setProfessionals((prev) =>
+        prev.map((p) => (p.id === professionalId ? { ...p, ...updates } : p)),
+      )
+
+      await supabase
+        .from('professionals' as any)
+        .update(updates)
+        .eq('id', professionalId)
+    } catch (e) {
+      console.error('Error registering payment:', e)
+    }
+  }
+
   return createElement(
     MainStoreContext.Provider,
     {
@@ -543,6 +579,7 @@ export function MainStoreProvider({ children }: { children: ReactNode }) {
         generateOtp,
         verifyOtp,
         deleteReview,
+        registerPayment,
       },
     },
     children,
