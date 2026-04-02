@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Wand2, UploadCloud, Edit3, X, Check, Copy, Instagram } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -190,13 +191,15 @@ const RegisterPage = () => {
         <p className="text-muted-foreground mb-6">
           Preencha os dados abaixo para criar seu perfil profissional no guia.
         </p>
-        <Button
-          asChild
-          variant="outline"
-          className="shadow-sm font-semibold border-primary/20 text-primary hover:bg-primary/5"
+        <Link
+          to="/editar-perfil"
+          className={cn(
+            buttonVariants({ variant: 'outline' }),
+            'shadow-sm font-semibold border-primary/20 text-primary hover:bg-primary/5',
+          )}
         >
-          <Link to="/editar-perfil">Já tem um cadastro? Atualize seus dados</Link>
-        </Button>
+          Já tem um cadastro? Atualize seus dados
+        </Link>
       </div>
 
       <div className="flex items-center justify-between mb-8 relative px-4">
