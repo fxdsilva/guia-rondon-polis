@@ -16,6 +16,52 @@ import useMainStore from '@/stores/main'
 
 const getSlug = (str: string) => str.toLowerCase().replace(/\s+/g, '-')
 
+const NavLinks = ({
+  onHomeClick,
+}: {
+  onHomeClick: (e: React.MouseEvent<HTMLAnchorElement>) => void
+}) => (
+  <>
+    <Link
+      to="/"
+      onClick={onHomeClick}
+      className="text-sm font-medium hover:text-primary transition-colors py-2"
+    >
+      Início
+    </Link>
+
+    <DropdownMenu>
+      <DropdownMenuTrigger className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1 outline-none py-2 text-left">
+        Categorias <ChevronDown className="w-4 h-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-[260px] max-h-[60vh] overflow-y-auto z-[100]">
+        <DropdownMenuItem asChild className="font-semibold mb-2 bg-muted/30">
+          <Link to="/categoria/todas">Todas as Categorias</Link>
+        </DropdownMenuItem>
+        {Object.entries(CATEGORY_GROUPS).map(([group, cats]) => (
+          <DropdownMenuGroup key={group} className="mb-2">
+            <DropdownMenuLabel className="text-xs text-muted-foreground bg-muted py-1">
+              {group}
+            </DropdownMenuLabel>
+            {cats.map((cat) => (
+              <DropdownMenuItem key={cat} asChild>
+                <Link to={`/categoria/${getSlug(cat)}`}>{cat}</Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+
+    <Link
+      to="/admin"
+      className="text-sm font-medium hover:text-primary transition-colors py-2 text-center"
+    >
+      Admin
+    </Link>
+  </>
+)
+
 export default function Layout() {
   const location = useLocation()
   const { currentUserId } = useMainStore()
@@ -34,48 +80,6 @@ export default function Layout() {
     setIsMobileMenuOpen(false)
   }
 
-  const NavLinks = () => (
-    <>
-      <Link
-        to="/"
-        onClick={handleHomeClick}
-        className="text-sm font-medium hover:text-primary transition-colors py-2"
-      >
-        Início
-      </Link>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1 outline-none py-2 text-left">
-          Categorias <ChevronDown className="w-4 h-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-[260px] max-h-[60vh] overflow-y-auto">
-          <DropdownMenuItem asChild className="font-semibold mb-2 bg-muted/30">
-            <Link to="/categoria/todas">Todas as Categorias</Link>
-          </DropdownMenuItem>
-          {Object.entries(CATEGORY_GROUPS).map(([group, cats]) => (
-            <DropdownMenuGroup key={group} className="mb-2">
-              <DropdownMenuLabel className="text-xs text-muted-foreground bg-muted py-1">
-                {group}
-              </DropdownMenuLabel>
-              {cats.map((cat) => (
-                <DropdownMenuItem key={cat} asChild>
-                  <Link to={`/categoria/${getSlug(cat)}`}>{cat}</Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuGroup>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <Link
-        to="/admin"
-        className="text-sm font-medium hover:text-primary transition-colors py-2 text-center"
-      >
-        Admin
-      </Link>
-    </>
-  )
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b shadow-sm">
@@ -86,7 +90,7 @@ export default function Layout() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
-            <NavLinks />
+            <NavLinks onHomeClick={handleHomeClick} />
             <div className="flex items-center gap-4 border-l pl-6 ml-2">
               <Link
                 to="/anunciar-empresa"
@@ -125,7 +129,7 @@ export default function Layout() {
                 </SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-2 mt-6 items-start w-full">
-                <NavLinks />
+                <NavLinks onHomeClick={handleHomeClick} />
                 <div className="w-full mt-6 pt-6 border-t flex flex-col gap-4">
                   <Link
                     to="/anunciar-empresa"
