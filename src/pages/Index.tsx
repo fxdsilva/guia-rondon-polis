@@ -22,7 +22,7 @@ const Index = () => {
       <WelcomeNewcomers />
       <HowItWorks />
       <MapSection
-        neighborhood={selectedNeighborhoods.length > 0 ? selectedNeighborhoods[0] : undefined}
+        neighborhoodId={selectedNeighborhoods.length > 0 ? selectedNeighborhoods[0] : undefined}
       />
       <CtaBanner />
 

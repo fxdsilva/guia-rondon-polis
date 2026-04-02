@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MultiSelect } from '@/components/MultiSelect'
 import { ProfessionalCard } from '@/components/ProfessionalCard'
+import { ContextualAds } from '@/components/ContextualAds'
+import { MapSection } from '@/components/home/MapSection'
 import useMainStore from '@/stores/main'
 
 export default function CategoryPage() {
@@ -147,6 +149,12 @@ export default function CategoryPage() {
 
       {/* Results */}
       <div className="container mx-auto px-4 pb-24 flex-1">
+        {slug !== 'todas' && (
+          <div className="mb-10">
+            <ContextualAds categorySlug={slug} layout="grid" />
+          </div>
+        )}
+
         <div className="mb-6 flex justify-between items-center text-sm text-muted-foreground">
           <p>
             Mostrando {filteredPros.length} {filteredPros.length === 1 ? 'resultado' : 'resultados'}
@@ -189,6 +197,10 @@ export default function CategoryPage() {
           </div>
         )}
       </div>
+
+      <MapSection
+        neighborhoodId={localNeighborhoods.length > 0 ? localNeighborhoods[0] : undefined}
+      />
     </div>
   )
 }

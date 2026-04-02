@@ -6,24 +6,44 @@ import { Button } from '@/components/ui/button'
 import useMainStore from '@/stores/main'
 
 interface Props {
-  categoryId: string
+  categoryId?: string
+  categorySlug?: string
   layout?: 'vertical' | 'grid'
 }
 
-export function ContextualAds({ categoryId, layout = 'vertical' }: Props) {
+export function ContextualAds({ categoryId, categorySlug, layout = 'vertical' }: Props) {
   const { ads, categories } = useMainStore()
 
   const expandedCategories = useMemo(() => {
-    const cat = categories.find((c) => c.id === categoryId)
-    if (!cat) return []
+    let cat
+    if (categoryId) {
+      cat = categories.find((c) => c.id === categoryId)
+    } else if (categorySlug) {
+      cat = categories.find((c) => c.slug === categorySlug)
+    }
+
+    if (!cat) {
+      // Se for um slug de grupo/segmento
+      if (categorySlug) {
+        const groupName = categorySlug.replace(/-/g, ' ').toLowerCase()
+        const groupCats = categories.filter((c) => c.group && c.group.toLowerCase() === groupName)
+        if (groupCats.length > 0) {
+          const names = groupCats.flatMap((c) => [c.name.toLowerCase(), c.slug.toLowerCase()])
+          return [groupName, categorySlug, ...names]
+        }
+      }
+      return []
+    }
+
     return [
       cat.name.toLowerCase(),
       cat.slug.toLowerCase(),
       ...(cat.group ? [cat.group.toLowerCase()] : []),
     ]
-  }, [categoryId, categories])
+  }, [categoryId, categorySlug, categories])
 
   const displayAds = useMemo(() => {
+    if (expandedCategories.length === 0) return []
     return ads.filter(
       (ad) =>
         ad.active &&
