@@ -1,13 +1,33 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
-import { Search, ArrowLeft, Filter } from 'lucide-react'
+import {
+  Search,
+  ArrowLeft,
+  Filter,
+  Phone,
+  Instagram,
+  Facebook,
+  Globe,
+  ExternalLink,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MultiSelect } from '@/components/MultiSelect'
 import { ProfessionalCard } from '@/components/ProfessionalCard'
-import { ContextualAds } from '@/components/ContextualAds'
 import { MapSection } from '@/components/home/MapSection'
 import useMainStore from '@/stores/main'
+import { supabase } from '@/lib/supabase/client'
+import type { Database } from '@/lib/supabase/types'
+
+type Ad = Database['public']['Tables']['advertisements']['Row']
+
+const normalizeSlug = (str: string) => {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+}
 
 export default function CategoryPage() {
   const { slug } = useParams()
@@ -34,6 +54,21 @@ export default function CategoryPage() {
 
   const isGroup = !category && slug && slug !== 'todas'
 
+  const [ads, setAds] = useState<Ad[]>([])
+
+  useEffect(() => {
+    async function fetchAds() {
+      const { data } = await supabase.from('advertisements').select('*').eq('active', true)
+      if (data) setAds(data)
+    }
+    fetchAds()
+  }, [])
+
+  const contextualAds = useMemo(() => {
+    if (!slug || slug === 'todas') return []
+    return ads.filter((ad) => ad.target_categories.includes(slug) || ad.is_general)
+  }, [ads, slug])
+
   const filteredPros = useMemo(() => {
     return populatedProfessionals.filter((pro) => {
       // Filter by exact category
@@ -43,7 +78,8 @@ export default function CategoryPage() {
 
       // Filter by group (segment)
       if (isGroup) {
-        const groupSlug = pro.category?.group?.toLowerCase().replace(/\s+/g, '-')
+        const groupStr = pro.category?.group || ''
+        const groupSlug = normalizeSlug(groupStr)
         if (groupSlug !== slug) return false
       }
 
@@ -155,14 +191,8 @@ export default function CategoryPage() {
           </p>
         </div>
 
-        {filteredPros.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredPros.map((pro) => (
-              <ProfessionalCard key={pro.id} pro={pro} />
-            ))}
-          </div>
-        ) : (
-          <div className="w-full bg-white border rounded-3xl p-10 md:p-16 text-center shadow-sm max-w-4xl mx-auto mt-8 animate-fade-in-up">
+        {filteredPros.length === 0 && (
+          <div className="w-full bg-white border rounded-3xl p-10 md:p-16 text-center shadow-sm max-w-4xl mx-auto mb-8 animate-fade-in-up">
             <div className="text-6xl mb-6">🚀</div>
             <h3 className="text-2xl md:text-3xl font-bold text-secondary mb-4 leading-tight">
               Ainda não há profissionais cadastrados no sistema, mas isso é apenas o começo!
@@ -191,9 +221,100 @@ export default function CategoryPage() {
           </div>
         )}
 
-        {slug !== 'todas' && (
-          <div className="mt-12">
-            <ContextualAds categorySlug={slug} layout="grid" />
+        {(filteredPros.length > 0 || contextualAds.length > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: Math.max(filteredPros.length, contextualAds.length) }).map(
+              (_, index) => {
+                const pro = filteredPros[index]
+                const ad = contextualAds[index]
+                return (
+                  <div key={pro?.id || `ad-${ad?.id}`} className="flex flex-col gap-4">
+                    {pro && <ProfessionalCard pro={pro} />}
+                    {ad && (
+                      <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all relative overflow-hidden group h-full">
+                        <div className="absolute top-0 right-0 bg-primary/10 text-primary text-[10px] font-bold px-2 py-1 rounded-bl-lg uppercase tracking-wider">
+                          Parceiro
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-primary/20 bg-white">
+                            <img
+                              src={ad.image_url}
+                              alt={ad.company_name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-foreground leading-tight line-clamp-1">
+                              {ad.company_name}
+                            </h4>
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                              {ad.description}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-auto pt-3 border-t border-primary/10">
+                          {ad.phone && (
+                            <a
+                              href={`https://wa.me/55${ad.phone.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
+                              title="WhatsApp"
+                            >
+                              <Phone className="w-4 h-4" />
+                            </a>
+                          )}
+                          {ad.instagram && (
+                            <a
+                              href={ad.instagram}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
+                              title="Instagram"
+                            >
+                              <Instagram className="w-4 h-4" />
+                            </a>
+                          )}
+                          {ad.facebook && (
+                            <a
+                              href={ad.facebook}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
+                              title="Facebook"
+                            >
+                              <Facebook className="w-4 h-4" />
+                            </a>
+                          )}
+                          {ad.website && (
+                            <a
+                              href={ad.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
+                              title="Website"
+                            >
+                              <Globe className="w-4 h-4" />
+                            </a>
+                          )}
+                          <div className="flex-1" />
+                          {ad.link && (
+                            <a
+                              href={ad.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-semibold text-primary flex items-center gap-1 hover:underline"
+                            >
+                              Acessar <ExternalLink className="w-4 h-4" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              },
+            )}
           </div>
         )}
       </div>
