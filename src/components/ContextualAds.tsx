@@ -55,11 +55,6 @@ export function ContextualAds({ categoryId, categorySlug, layout = 'vertical' }:
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-        <span className="h-px bg-border flex-1"></span>
-        Sugestões de Empresas Parceiras
-        <span className="h-px bg-border flex-1"></span>
-      </h4>
       <div
         className={`grid gap-4 ${layout === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}`}
       >

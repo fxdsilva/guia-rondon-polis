@@ -149,12 +149,6 @@ export default function CategoryPage() {
 
       {/* Results */}
       <div className="container mx-auto px-4 pb-24 flex-1">
-        {slug !== 'todas' && (
-          <div className="mb-10">
-            <ContextualAds categorySlug={slug} layout="grid" />
-          </div>
-        )}
-
         <div className="mb-6 flex justify-between items-center text-sm text-muted-foreground">
           <p>
             Mostrando {filteredPros.length} {filteredPros.length === 1 ? 'resultado' : 'resultados'}
@@ -194,6 +188,12 @@ export default function CategoryPage() {
                 <Link to="/">Voltar para o Início</Link>
               </Button>
             </div>
+          </div>
+        )}
+
+        {slug !== 'todas' && (
+          <div className="mt-12">
+            <ContextualAds categorySlug={slug} layout="grid" />
           </div>
         )}
       </div>
