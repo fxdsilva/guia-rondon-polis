@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, MessageCircle, MapPin, ChevronDown, Megaphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -16,60 +16,24 @@ import useMainStore from '@/stores/main'
 
 const getSlug = (str: string) => str.toLowerCase().replace(/\s+/g, '-')
 
-const NavLinks = ({
-  onHomeClick,
-}: {
-  onHomeClick: (e: React.MouseEvent<HTMLAnchorElement>) => void
-}) => (
-  <>
-    <Link
-      to="/"
-      onClick={onHomeClick}
-      className="text-sm font-medium hover:text-primary transition-colors py-2"
-    >
-      Início
-    </Link>
-
-    <DropdownMenu>
-      <DropdownMenuTrigger className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1 outline-none py-2 text-left">
-        Categorias <ChevronDown className="w-4 h-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[260px] max-h-[60vh] overflow-y-auto z-[100]">
-        <DropdownMenuItem asChild className="font-semibold mb-2 bg-muted/30">
-          <Link to="/categoria/todas">Todas as Categorias</Link>
-        </DropdownMenuItem>
-        {Object.entries(CATEGORY_GROUPS).map(([group, cats]) => (
-          <DropdownMenuGroup key={group} className="mb-2">
-            <DropdownMenuLabel className="text-xs text-muted-foreground bg-muted py-1">
-              {group}
-            </DropdownMenuLabel>
-            {cats.map((cat) => (
-              <DropdownMenuItem key={cat} asChild>
-                <Link to={`/categoria/${getSlug(cat)}`}>{cat}</Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuGroup>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-
-    <Link
-      to="/admin"
-      className="text-sm font-medium hover:text-primary transition-colors py-2 text-center"
-    >
-      Admin
-    </Link>
-  </>
-)
-
 export default function Layout() {
   const location = useLocation()
+  const navigate = useNavigate()
   const { currentUserId } = useMainStore()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false)
 
   useEffect(() => {
     setIsMobileMenuOpen(false)
+    setIsCategoryOpen(false)
     window.scrollTo({ top: 0, behavior: 'auto' })
+
+    // Safety cleanup for Radix UI scroll lock bug that blocks pointer events after navigation
+    const timer = setTimeout(() => {
+      document.body.style.pointerEvents = ''
+      document.body.removeAttribute('data-scroll-locked')
+    }, 50)
+    return () => clearTimeout(timer)
   }, [location.pathname])
 
   const handleHomeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -78,19 +42,69 @@ export default function Layout() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
     setIsMobileMenuOpen(false)
+    setIsCategoryOpen(false)
   }
+
+  const renderNavLinks = () => (
+    <>
+      <Link
+        to="/"
+        onClick={handleHomeClick}
+        className="text-sm font-medium hover:text-primary transition-colors py-2"
+      >
+        Início
+      </Link>
+
+      <DropdownMenu open={isCategoryOpen} onOpenChange={setIsCategoryOpen}>
+        <DropdownMenuTrigger className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1 outline-none py-2 text-left">
+          Categorias <ChevronDown className="w-4 h-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          className="w-[260px] max-h-[60vh] overflow-y-auto z-[100]"
+        >
+          <DropdownMenuItem asChild className="font-semibold mb-2 bg-muted/30 cursor-pointer">
+            <Link to="/categoria/todas" className="w-full">
+              Todas as Categorias
+            </Link>
+          </DropdownMenuItem>
+          {Object.entries(CATEGORY_GROUPS).map(([group, cats]) => (
+            <DropdownMenuGroup key={group} className="mb-2">
+              <DropdownMenuLabel className="text-xs text-muted-foreground bg-muted py-1">
+                {group}
+              </DropdownMenuLabel>
+              {cats.map((cat) => (
+                <DropdownMenuItem key={cat} asChild className="cursor-pointer">
+                  <Link to={`/categoria/${getSlug(cat)}`} className="w-full">
+                    {cat}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Link
+        to="/admin"
+        className="text-sm font-medium hover:text-primary transition-colors py-2 text-center"
+      >
+        Admin
+      </Link>
+    </>
+  )
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b shadow-sm">
-        <div className="container mx-auto px-4 h-16 items-center justify-between inline-flex">
+        <div className="container mx-auto px-4 h-16 flex w-full items-center justify-between">
           <Link to="/" onClick={handleHomeClick} className="flex items-center gap-2 group">
             <MapPin className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
             <span className="font-bold text-xl text-secondary">Guia Rondonópolis</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
-            <NavLinks onHomeClick={handleHomeClick} />
+            {renderNavLinks()}
             <div className="flex items-center gap-4 border-l pl-6 ml-2">
               <Link
                 to="/anunciar-empresa"
@@ -121,7 +135,7 @@ export default function Layout() {
                 <span className="sr-only">Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px]">
+            <SheetContent side="right" className="w-[300px] z-[200]">
               <SheetHeader>
                 <SheetTitle className="text-left flex items-center gap-2 border-b pb-4">
                   <MapPin className="w-5 h-5 text-primary" />
@@ -129,7 +143,7 @@ export default function Layout() {
                 </SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-2 mt-6 items-start w-full">
-                <NavLinks onHomeClick={handleHomeClick} />
+                {renderNavLinks()}
                 <div className="w-full mt-6 pt-6 border-t flex flex-col gap-4">
                   <Link
                     to="/anunciar-empresa"
@@ -161,7 +175,7 @@ export default function Layout() {
         </div>
       </header>
 
-      <main className="flex-1 mt-16 animate-fade-in flex flex-col">
+      <main className="flex-1 mt-16 animate-fade-in flex flex-col relative z-0">
         <Outlet />
       </main>
 
@@ -217,7 +231,6 @@ export default function Layout() {
         </div>
       </footer>
 
-      {/* Floating Buttons */}
       {!currentUserId && (
         <Button
           asChild
