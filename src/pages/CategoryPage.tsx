@@ -187,15 +187,16 @@ export default function CategoryPage() {
       <div className="container mx-auto px-4 pb-24 flex-1">
         <div className="mb-6 flex justify-between items-center text-sm text-muted-foreground">
           <p>
-            Mostrando {filteredPros.length} {filteredPros.length === 1 ? 'resultado' : 'resultados'}
+            Mostrando {filteredPros.length}{' '}
+            {filteredPros.length === 1 ? 'profissional' : 'profissionais'}
           </p>
         </div>
 
-        {filteredPros.length === 0 && (
+        {filteredPros.length === 0 && contextualAds.length === 0 && (
           <div className="w-full bg-white border rounded-3xl p-10 md:p-16 text-center shadow-sm max-w-4xl mx-auto mb-8 animate-fade-in-up">
             <div className="text-6xl mb-6">🚀</div>
             <h3 className="text-2xl md:text-3xl font-bold text-secondary mb-4 leading-tight">
-              Ainda não há profissionais cadastrados no sistema, mas isso é apenas o começo!
+              Ainda não há profissionais cadastrados nesta categoria, mas isso é apenas o começo!
             </h3>
             <p className="text-muted-foreground text-lg md:text-xl mb-3">
               Em breve, novos talentos farão parte desta plataforma, trazendo conhecimento,
@@ -221,100 +222,108 @@ export default function CategoryPage() {
           </div>
         )}
 
-        {(filteredPros.length > 0 || contextualAds.length > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: Math.max(filteredPros.length, contextualAds.length) }).map(
-              (_, index) => {
-                const pro = filteredPros[index]
-                const ad = contextualAds[index]
-                return (
-                  <div key={pro?.id || `ad-${ad?.id}`} className="flex flex-col gap-4">
-                    {pro && <ProfessionalCard pro={pro} />}
-                    {ad && (
-                      <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all relative overflow-hidden group h-full">
-                        <div className="absolute top-0 right-0 bg-primary/10 text-primary text-[10px] font-bold px-2 py-1 rounded-bl-lg uppercase tracking-wider">
-                          Parceiro
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-primary/20 bg-white">
-                            <img
-                              src={ad.image_url}
-                              alt={ad.company_name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-foreground leading-tight line-clamp-1">
-                              {ad.company_name}
-                            </h4>
-                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                              {ad.description}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 mt-auto pt-3 border-t border-primary/10">
-                          {ad.phone && (
-                            <a
-                              href={`https://wa.me/55${ad.phone.replace(/\D/g, '')}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
-                              title="WhatsApp"
-                            >
-                              <Phone className="w-4 h-4" />
-                            </a>
-                          )}
-                          {ad.instagram && (
-                            <a
-                              href={ad.instagram}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
-                              title="Instagram"
-                            >
-                              <Instagram className="w-4 h-4" />
-                            </a>
-                          )}
-                          {ad.facebook && (
-                            <a
-                              href={ad.facebook}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
-                              title="Facebook"
-                            >
-                              <Facebook className="w-4 h-4" />
-                            </a>
-                          )}
-                          {ad.website && (
-                            <a
-                              href={ad.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
-                              title="Website"
-                            >
-                              <Globe className="w-4 h-4" />
-                            </a>
-                          )}
-                          <div className="flex-1" />
-                          {ad.link && (
-                            <a
-                              href={ad.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-semibold text-primary flex items-center gap-1 hover:underline"
-                            >
-                              Acessar <ExternalLink className="w-4 h-4" />
-                            </a>
-                          )}
-                        </div>
-                      </div>
+        {filteredPros.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Profissionais & Serviços</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredPros.map((pro) => (
+                <ProfessionalCard key={pro.id} pro={pro} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {contextualAds.length > 0 && (
+          <div className="animate-fade-in-up">
+            <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+              <span className="text-primary">⭐</span> Marcas que apoiam
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {contextualAds.map((ad) => (
+                <div
+                  key={`ad-${ad.id}`}
+                  className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all relative overflow-hidden group h-full"
+                >
+                  <div className="absolute top-0 right-0 bg-primary/10 text-primary text-[10px] font-bold px-2 py-1 rounded-bl-lg uppercase tracking-wider">
+                    Parceiro
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-primary/20 bg-white">
+                      <img
+                        src={ad.image_url}
+                        alt={ad.company_name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-foreground leading-tight line-clamp-1">
+                        {ad.company_name}
+                      </h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                        {ad.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-auto pt-3 border-t border-primary/10">
+                    {ad.phone && (
+                      <a
+                        href={`https://wa.me/55${ad.phone.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
+                        title="WhatsApp"
+                      >
+                        <Phone className="w-4 h-4" />
+                      </a>
+                    )}
+                    {ad.instagram && (
+                      <a
+                        href={ad.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
+                        title="Instagram"
+                      >
+                        <Instagram className="w-4 h-4" />
+                      </a>
+                    )}
+                    {ad.facebook && (
+                      <a
+                        href={ad.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
+                        title="Facebook"
+                      >
+                        <Facebook className="w-4 h-4" />
+                      </a>
+                    )}
+                    {ad.website && (
+                      <a
+                        href={ad.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:bg-primary/20 bg-primary/10 p-2 rounded-full transition-colors"
+                        title="Website"
+                      >
+                        <Globe className="w-4 h-4" />
+                      </a>
+                    )}
+                    <div className="flex-1" />
+                    {ad.link && (
+                      <a
+                        href={ad.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold text-primary flex items-center gap-1 hover:underline"
+                      >
+                        Acessar <ExternalLink className="w-4 h-4" />
+                      </a>
                     )}
                   </div>
-                )
-              },
-            )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
